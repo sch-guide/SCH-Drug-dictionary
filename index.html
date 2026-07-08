@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="실무용 약물 비례식 계산기와 약학정보원 검색 도구"
+    />
+    <title>약물사전</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <p class="eyebrow">Drug dictionary</p>
+        <h1>약물사전</h1>
+        <p class="notice">
+          이 계산기는 참고용입니다. 실제 투약, 용량 조절, 수액 처방은 병원 지침과 담당 의료진의 처방을 우선하세요.
+        </p>
+      </header>
+
+      <section id="tab-search" class="tab-panel is-active" data-panel="search" aria-labelledby="tab-btn-search">
+        <section class="card search-card">
+          <div class="section-head">
+            <div>
+              <h2>약학정보원 검색</h2>
+              <p>약물명을 입력하고 공식 페이지에서 확인하세요.</p>
+            </div>
+            <span class="status-pill">공식 연결</span>
+          </div>
+
+          <form id="searchForm" class="search-form">
+            <label for="drugInput">약물명</label>
+            <div class="input-row">
+              <input id="drugInput" name="drug" type="search" inputmode="search" autocomplete="off" placeholder="나프실린" />
+              <button type="button" id="saveFavoriteBtn" class="icon-button" title="즐겨찾기 저장" aria-label="즐겨찾기 저장">★</button>
+            </div>
+            <div class="submit-row">
+              <button class="primary-action" type="submit">검색</button>
+            </div>
+          </form>
+
+          <p class="helper-text">약학정보원 검색 결과 페이지가 바로 열립니다.</p>
+
+          <div class="quick-actions" aria-label="빠른 연결">
+            <button type="button" data-action="cards">내 약물카드 보기</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-head">
+            <h2>최근 검색어</h2>
+            <button type="button" id="clearHistoryBtn" class="text-button">지우기</button>
+          </div>
+          <div id="recentList" class="chip-list empty-list">아직 없습니다</div>
+        </section>
+
+        <section class="card">
+          <div class="section-head">
+            <h2>내 약물카드</h2>
+            <button type="button" class="text-button" data-action="cards">보기</button>
+          </div>
+          <div id="cardList" class="card-link-list empty-list">아직 없습니다</div>
+        </section>
+      </section>
+
+      <section id="tab-calc" class="tab-panel" data-panel="calc" aria-labelledby="tab-btn-calc">
+        <section class="calculator-card card primary-calculator">
+          <h2>수액 속도 mL/hr</h2>
+          <div class="field-grid">
+            <label for="totalVolumeRate">총 수액량
+              <div class="unit-field">
+                <input id="totalVolumeRate" type="number" min="0" step="any" />
+                <select id="totalVolumeRateUnit" aria-label="총 수액량 단위">
+                  <option value="mL">mL</option>
+                  <option value="L">L</option>
+                </select>
+              </div>
+            </label>
+            <label for="infusionTimeRate">주입 시간
+              <div class="unit-field">
+                <input id="infusionTimeRate" type="number" min="0" step="any" />
+                <select id="infusionTimeRateUnit" aria-label="주입 시간 단위">
+                  <option value="hr">시간</option>
+                  <option value="min">분</option>
+                </select>
+              </div>
+            </label>
+          </div>
+          <div class="result-row">
+            <output id="fluidRateResult">-- mL/hr</output>
+            <button type="button" class="copy-result" data-copy-target="fluidRateResult">복사</button>
+          </div>
+          <div class="result-row secondary-result">
+            <output id="dropIntervalResult">--</output>
+            <button type="button" class="copy-result" data-copy-target="dropIntervalResult">복사</button>
+          </div>
+          <p class="calculation-line" id="gttMinuteResult"></p>
+          <p class="error-text" id="fluidRateError"></p>
+          <p class="formula">mL/hr = 총 수액량(mL) ÷ 시간(hr)</p>
+          <p class="formula">gtt/min = (mL/hr × 20gtt/mL) ÷ 60</p>
+          <p class="formula">방울 간격(초) = 60 ÷ (mL/hr × 20 ÷ 60)</p>
+        </section>
+
+        <section class="calculator-card card">
+          <h2>비례식 약물 계산기</h2>
+          <div class="field-grid">
+            <label for="drugAmount">약물 함량 숫자
+              <div class="unit-field">
+                <input id="drugAmount" type="number" min="0" step="any" />
+                <select id="drugAmountUnit" aria-label="약물 함량 단위">
+                  <option value="g">g</option>
+                  <option value="mg">mg</option>
+                  <option value="mcg">mcg</option>
+                </select>
+              </div>
+            </label>
+            <label for="totalVolume">총 부피 숫자
+              <div class="unit-field">
+                <input id="totalVolume" type="number" min="0" step="any" />
+                <select id="totalVolumeUnit" aria-label="총 부피 단위">
+                  <option value="mL">mL</option>
+                </select>
+              </div>
+            </label>
+            <label for="prescribedDose">처방 용량 숫자
+              <div class="unit-field">
+                <input id="prescribedDose" type="number" min="0" step="any" />
+                <select id="prescribedDoseUnit" aria-label="처방 용량 단위">
+                  <option value="mg">mg</option>
+                  <option value="g">g</option>
+                  <option value="mcg">mcg</option>
+                </select>
+              </div>
+            </label>
+          </div>
+          <div class="result-row">
+            <output id="proportionResult">-- mL</output>
+            <button type="button" class="copy-result" data-copy-target="proportionResult">복사</button>
+          </div>
+          <p class="calculation-line" id="proportionFormulaLine"></p>
+          <p class="error-text" id="proportionError"></p>
+          <p class="formula">투여량(mL) = 처방용량(mg 환산) × 총부피(mL) ÷ 약물함량(mg 환산)</p>
+          <p class="example-text">예: 1g/5mL 약물에서 150mg 처방 → 0.75mL</p>
+        </section>
+
+        <section class="calculator-card card">
+          <h2>BSA</h2>
+          <div class="field-grid">
+            <label for="heightCm">키(cm)<input id="heightCm" type="number" min="0" step="any" /></label>
+            <label for="weightKgBsa">체중(kg)<input id="weightKgBsa" type="number" min="0" step="any" /></label>
+          </div>
+          <div class="result-row">
+            <output id="bsaResult">-- m²</output>
+            <button type="button" class="copy-result" data-copy-target="bsaResult">복사</button>
+          </div>
+          <p class="error-text" id="bsaError"></p>
+          <p class="formula">BSA = √((키 × 체중) / 3600), Mosteller 공식</p>
+        </section>
+
+        <section class="calculator-card card">
+          <h2>Cockcroft-Gault</h2>
+          <div class="field-grid">
+            <label for="age">나이<input id="age" type="number" min="0" step="any" /></label>
+            <label for="weightKgCrcl">체중(kg)<input id="weightKgCrcl" type="number" min="0" step="any" /></label>
+            <label for="scr">혈청 Cr(Scr)<input id="scr" type="number" min="0" step="any" /></label>
+            <label for="sex">성별
+              <select id="sex">
+                <option value="male">남성</option>
+                <option value="female">여성</option>
+              </select>
+            </label>
+          </div>
+          <div class="result-row">
+            <output id="crclResult">--</output>
+            <button type="button" class="copy-result" data-copy-target="crclResult">복사</button>
+          </div>
+          <p class="error-text" id="crclError"></p>
+          <p class="formula">GFR = [(140 - age) × BW / (72 × S-cr)] × 1(남성), 0.85(여성)</p>
+          <p class="formula">Carbo dose = target AUC(2) × (GFR + 25)</p>
+        </section>
+      </section>
+
+      <section id="tab-favorites" class="tab-panel" data-panel="favorites" aria-labelledby="tab-btn-favorites">
+        <section class="card">
+          <div class="section-head">
+            <div>
+              <h2>내 약물카드</h2>
+              <p>별표로 저장한 약물을 한곳에서 확인하세요.</p>
+            </div>
+            <button type="button" id="clearFavoritesBtn" class="text-button">지우기</button>
+          </div>
+          <div id="favoriteList" class="chip-list empty-list">아직 없습니다</div>
+        </section>
+      </section>
+
+      <section id="tab-icu" class="tab-panel" data-panel="icu" aria-labelledby="tab-btn-icu">
+        <section class="card icu-card">
+          <div class="section-head icu-head">
+            <div>
+              <h2>ICU 자료</h2>
+              <p>SCH ICU 자료 페이지를 앱 안에서 확인합니다.</p>
+            </div>
+          </div>
+          <iframe
+            class="icu-frame"
+            src="https://sch-icu.github.io/icu/"
+            title="SCH ICU 자료"
+            loading="lazy"
+          ></iframe>
+          <p class="helper-text">화면이 비어 있으면 사이트 정책이나 브라우저 보안 설정 때문에 iframe 표시가 막힌 것입니다.</p>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-tabs" aria-label="하단 메뉴">
+      <button id="tab-btn-search" class="is-active" type="button" data-tab="search">약학정보원</button>
+      <button id="tab-btn-calc" type="button" data-tab="calc">계산기</button>
+      <button id="tab-btn-favorites" type="button" data-tab="favorites">내 약물카드</button>
+      <button id="tab-btn-icu" type="button" data-tab="icu">ICU 자료</button>
+    </nav>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
