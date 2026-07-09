@@ -1,0 +1,1132 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="실무용 약물 비례식 계산기와 약학정보원 검색 도구"
+    />
+    <title>약물사전</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <p class="eyebrow">Drug dictionary</p>
+        <h1>약물사전</h1>
+        <p class="notice">
+          이 계산기는 참고용입니다. 실제 투약, 용량 조절, 수액 처방은 병원 지침과 담당 의료진의 처방을 우선하세요.
+        </p>
+      </header>
+
+      <section id="tab-search" class="tab-panel is-active" data-panel="search" aria-labelledby="tab-btn-search">
+        <section class="card search-card">
+          <div class="section-head">
+            <div>
+              <h2>약학정보원 검색</h2>
+              <p>약물명을 입력하고 공식 페이지에서 확인하세요.</p>
+            </div>
+            <span class="status-pill">공식 연결</span>
+          </div>
+
+          <form id="searchForm" class="search-form">
+            <label for="drugInput">약물명</label>
+            <div class="input-row">
+              <input id="drugInput" name="drug" type="search" inputmode="search" autocomplete="off" placeholder="나프실린" />
+              <button type="button" id="saveFavoriteBtn" class="icon-button" title="즐겨찾기 저장" aria-label="즐겨찾기 저장">★</button>
+            </div>
+            <div class="submit-row">
+              <button class="primary-action" type="submit">검색</button>
+            </div>
+          </form>
+
+          <p class="helper-text">약학정보원 검색 결과 페이지가 바로 열립니다.</p>
+
+          <div class="quick-actions" aria-label="빠른 연결">
+            <button type="button" data-action="cards">내 약물카드 보기</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-head">
+            <h2>최근 검색어</h2>
+            <button type="button" id="clearHistoryBtn" class="text-button">지우기</button>
+          </div>
+          <div id="recentList" class="chip-list empty-list">아직 없습니다</div>
+        </section>
+
+        <section class="card">
+          <div class="section-head">
+            <h2>내 약물카드</h2>
+            <button type="button" class="text-button" data-action="cards">보기</button>
+          </div>
+          <div id="cardList" class="card-link-list empty-list">아직 없습니다</div>
+        </section>
+      </section>
+
+      <section id="tab-calc" class="tab-panel" data-panel="calc" aria-labelledby="tab-btn-calc">
+        <section class="calculator-card card primary-calculator">
+          <h2>수액 속도 mL/hr</h2>
+          <div class="field-grid">
+            <label for="totalVolumeRate">총 수액량
+              <div class="unit-field">
+                <input id="totalVolumeRate" type="number" min="0" step="any" />
+                <select id="totalVolumeRateUnit" aria-label="총 수액량 단위">
+                  <option value="mL">mL</option>
+                  <option value="L">L</option>
+                </select>
+              </div>
+            </label>
+            <label for="infusionTimeRate">주입 시간
+              <div class="unit-field">
+                <input id="infusionTimeRate" type="number" min="0" step="any" />
+                <select id="infusionTimeRateUnit" aria-label="주입 시간 단위">
+                  <option value="hr">시간</option>
+                  <option value="min">분</option>
+                </select>
+              </div>
+            </label>
+          </div>
+          <div class="result-row">
+            <output id="fluidRateResult">-- mL/hr</output>
+            <button type="button" class="copy-result" data-copy-target="fluidRateResult">복사</button>
+          </div>
+          <div class="result-row secondary-result">
+            <output id="dropIntervalResult">--</output>
+            <button type="button" class="copy-result" data-copy-target="dropIntervalResult">복사</button>
+          </div>
+          <p class="calculation-line" id="gttMinuteResult"></p>
+          <p class="error-text" id="fluidRateError"></p>
+          <p class="formula">mL/hr = 총 수액량(mL) ÷ 시간(hr)</p>
+          <p class="formula">gtt/min = (mL/hr × 20gtt/mL) ÷ 60</p>
+          <p class="formula">방울 간격(초) = 60 ÷ (mL/hr × 20 ÷ 60)</p>
+        </section>
+
+        <section class="calculator-card card">
+          <h2>비례식 약물 계산기</h2>
+          <div class="field-grid">
+            <label for="drugAmount">약물 함량 숫자
+              <div class="unit-field">
+                <input id="drugAmount" type="number" min="0" step="any" />
+                <select id="drugAmountUnit" aria-label="약물 함량 단위">
+                  <option value="g">g</option>
+                  <option value="mg">mg</option>
+                  <option value="mcg">mcg</option>
+                </select>
+              </div>
+            </label>
+            <label for="totalVolume">총 부피 숫자
+              <div class="unit-field">
+                <input id="totalVolume" type="number" min="0" step="any" />
+                <select id="totalVolumeUnit" aria-label="총 부피 단위">
+                  <option value="mL">mL</option>
+                </select>
+              </div>
+            </label>
+            <label for="prescribedDose">처방 용량 숫자
+              <div class="unit-field">
+                <input id="prescribedDose" type="number" min="0" step="any" />
+                <select id="prescribedDoseUnit" aria-label="처방 용량 단위">
+                  <option value="mg">mg</option>
+                  <option value="g">g</option>
+                  <option value="mcg">mcg</option>
+                </select>
+              </div>
+            </label>
+          </div>
+          <div class="result-row">
+            <output id="proportionResult">-- mL</output>
+            <button type="button" class="copy-result" data-copy-target="proportionResult">복사</button>
+          </div>
+          <p class="calculation-line" id="proportionFormulaLine"></p>
+          <p class="error-text" id="proportionError"></p>
+          <p class="formula">투여량(mL) = 처방용량(mg 환산) × 총부피(mL) ÷ 약물함량(mg 환산)</p>
+          <p class="example-text">예: 1g/5mL 약물에서 150mg 처방 → 0.75mL</p>
+        </section>
+
+        <section class="calculator-card card">
+          <h2>항암 용량 계산기</h2>
+          <div class="field-grid">
+            <label for="emrBsa">전산 BSA(m²)<input id="emrBsa" type="number" min="0" step="any" placeholder="예: 1.49" /></label>
+            <label for="bsaDosePerM2">코멘트 용량(mg/m²)<input id="bsaDosePerM2" type="number" min="0" step="any" placeholder="예: 60" /></label>
+            <label for="bsaDosePercent">감량률(%)
+              <input id="bsaDosePercent" type="text" inputmode="decimal" placeholder="예: 80 또는 80%" />
+            </label>
+          </div>
+          <div class="result-row">
+            <output id="bsaResult">-- mg</output>
+            <button type="button" class="copy-result" data-copy-target="bsaResult">복사</button>
+          </div>
+          <p class="calculation-line" id="bsaFormulaLine"></p>
+          <p class="error-text" id="bsaError"></p>
+          <p class="formula">총 용량(mg) = 전산 BSA(m²) × 코멘트 용량(mg/m²) × 감량률</p>
+        </section>
+
+        <section class="calculator-card card">
+          <h2>네오플라틴 계산기</h2>
+          <div class="field-grid">
+            <label for="age">나이<input id="age" type="number" min="0" step="any" /></label>
+            <label for="weightKgCrcl">체중(kg)<input id="weightKgCrcl" type="number" min="0" step="any" /></label>
+            <label for="scr">혈청 Cr(Scr)<input id="scr" type="number" min="0" step="any" /></label>
+            <label for="sex">성별
+              <select id="sex">
+                <option value="male">남성</option>
+                <option value="female">여성</option>
+              </select>
+            </label>
+          </div>
+          <div class="result-row">
+            <output id="crclResult">--</output>
+            <button type="button" class="copy-result" data-copy-target="crclResult">복사</button>
+          </div>
+          <p class="calculation-line calc-detail" id="crclFormulaLine"></p>
+          <p class="error-text" id="crclError"></p>
+          <p class="formula">GFR = [(140 - age) × BW / (72 × S-cr)] × 1(남성), 0.85(여성)</p>
+          <p class="formula">Carbo dose = target AUC(6) × (GFR + 25)</p>
+        </section>
+      </section>
+
+      <section id="tab-favorites" class="tab-panel" data-panel="favorites" aria-labelledby="tab-btn-favorites">
+        <section class="card">
+          <div class="section-head">
+            <div>
+              <h2>내 약물카드</h2>
+              <p>별표로 저장한 약물을 한곳에서 확인하세요.</p>
+            </div>
+            <button type="button" id="clearFavoritesBtn" class="text-button">지우기</button>
+          </div>
+          <div id="favoriteList" class="chip-list empty-list">아직 없습니다</div>
+        </section>
+      </section>
+
+      <section id="tab-icu" class="tab-panel" data-panel="icu" aria-labelledby="tab-btn-icu">
+        <section class="card icu-card">
+          <div class="section-head icu-head">
+            <div>
+              <h2>ICU 자료</h2>
+              <p>중환자실 약물계산기를 앱 안에서 바로 사용합니다.</p>
+            </div>
+          </div>
+          <iframe
+            id="icuCalcFrame"
+            class="icu-frame"
+            title="중환자실 약물계산기"
+            loading="lazy"
+          ></iframe>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-tabs" aria-label="하단 메뉴">
+      <button id="tab-btn-search" class="is-active" type="button" data-tab="search">약학정보원</button>
+      <button id="tab-btn-calc" type="button" data-tab="calc">계산기</button>
+      <button id="tab-btn-favorites" type="button" data-tab="favorites">내 약물카드</button>
+      <button id="tab-btn-icu" type="button" data-tab="icu">ICU 자료</button>
+    </nav>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="script.js" defer></script>
+    <script>
+    // ===== 계산기 (수액속도 / 비례식 / 항암용량 / 네오플라틴) =====
+    // 131병동 간호사전 계산기와 동일한 로직입니다.
+    (function(){
+        const doseUnitToMg = { g:1000, mg:1, mcg:0.001 };
+        const volumeUnitToMl = { L:1000, mL:1 };
+        const timeUnitToHours = { hr:1, min:1/60 };
+        const FIXED_DROP_FACTOR = 20;
+
+        function readCalcNumber(id){
+            const el = document.getElementById(id);
+            if(!el) return NaN;
+            const value = Number(el.value);
+            return Number.isFinite(value) ? value : NaN;
+        }
+        function isPositive(value){
+            return Number.isFinite(value) && value > 0;
+        }
+        function toMg(value, unit){ return Number(value) * doseUnitToMg[unit]; }
+        function toMl(value, unit){ return Number(value) * volumeUnitToMl[unit]; }
+        function toHours(value, unit){ return Number(value) * timeUnitToHours[unit]; }
+        function formatCalc(value, unit){
+            if(!Number.isFinite(value)) return unit ? `-- ${unit}` : "--";
+            const text = value.toFixed(2).replace(/\.?0+$/,"");
+            return unit ? `${text} ${unit}` : text;
+        }
+        function setCalcOutput(id, text){
+            const output = document.getElementById(id);
+            if(!output) return;
+            output.textContent = text;
+            output.dataset.copyValue = text.startsWith("--") ? "" : text;
+        }
+        function setCalcError(id, message){
+            const el = document.getElementById(id);
+            if(el) el.textContent = message || "";
+        }
+
+        function calculateFluidRate(){
+            const totalMl = toMl(
+                document.getElementById("totalVolumeRate").value,
+                document.getElementById("totalVolumeRateUnit").value
+            );
+            const hours = toHours(
+                document.getElementById("infusionTimeRate").value,
+                document.getElementById("infusionTimeRateUnit").value
+            );
+            if(!isPositive(totalMl) || !isPositive(hours)){
+                setCalcOutput("fluidRateResult", "-- mL/hr");
+                setCalcOutput("dropIntervalResult", "--");
+                document.getElementById("gttMinuteResult").textContent = "";
+                setCalcError("fluidRateError", "값을 모두 0보다 크게 입력하세요.");
+                return;
+            }
+            const mlPerHour = totalMl / hours;
+            const gttPerMinute = (mlPerHour * FIXED_DROP_FACTOR) / 60;
+            const secondsPerDrop = 60 / gttPerMinute;
+            setCalcOutput("fluidRateResult", formatCalc(mlPerHour, "mL/hr"));
+            setCalcOutput("dropIntervalResult", `${formatCalc(secondsPerDrop, "초에 1방울")}`);
+            document.getElementById("gttMinuteResult").textContent =
+                `참고: ${formatCalc(gttPerMinute, "gtt/min")} (drop factor 20 고정)`;
+            setCalcError("fluidRateError", "");
+        }
+
+        function calculateProportion(){
+            const drugAmountMg = toMg(
+                document.getElementById("drugAmount").value,
+                document.getElementById("drugAmountUnit").value
+            );
+            const volumeMl = readCalcNumber("totalVolume");
+            const prescribedMg = toMg(
+                document.getElementById("prescribedDose").value,
+                document.getElementById("prescribedDoseUnit").value
+            );
+            if(!isPositive(drugAmountMg) || !isPositive(volumeMl) || !isPositive(prescribedMg)){
+                setCalcOutput("proportionResult", "-- mL");
+                document.getElementById("proportionFormulaLine").textContent = "";
+                setCalcError("proportionError", "값을 모두 0보다 크게 입력하세요.");
+                return;
+            }
+            const result = (prescribedMg * volumeMl) / drugAmountMg;
+            setCalcOutput("proportionResult", formatCalc(result, "mL"));
+            document.getElementById("proportionFormulaLine").textContent =
+                `${formatCalc(drugAmountMg, "mg")} : ${formatCalc(volumeMl, "mL")} = ${formatCalc(prescribedMg, "mg")} : x, x = ${formatCalc(result, "mL")}`;
+            setCalcError("proportionError", "");
+        }
+
+        function calculateBsa(){
+            const emrBsa = readCalcNumber("emrBsa");
+            const dosePerM2 = readCalcNumber("bsaDosePerM2");
+            const percentInput = String(document.getElementById("bsaDosePercent").value || "").replace("%", "").trim();
+            const percentNumber = percentInput === "" ? 100 : Number(percentInput);
+            const doseFactor = percentNumber > 1 ? percentNumber / 100 : percentNumber;
+
+            if(!isPositive(emrBsa) || !isPositive(dosePerM2) || !isPositive(doseFactor)){
+                setCalcOutput("bsaResult", "-- mg");
+                document.getElementById("bsaFormulaLine").textContent = "";
+                setCalcError("bsaError", "값을 모두 0보다 크게 입력하세요.");
+                return;
+            }
+            const result = emrBsa * dosePerM2 * doseFactor;
+            setCalcOutput("bsaResult", formatCalc(result, "mg"));
+            document.getElementById("bsaFormulaLine").textContent =
+                `${formatCalc(emrBsa, "m²")} × ${formatCalc(dosePerM2, "mg/m²")} × ${formatCalc(doseFactor, "")} = ${formatCalc(result, "mg")}`;
+            setCalcError("bsaError", "");
+        }
+
+        function calculateCrcl(){
+            const age = readCalcNumber("age");
+            const weightKg = readCalcNumber("weightKgCrcl");
+            const scr = readCalcNumber("scr");
+            if(!isPositive(age) || !isPositive(weightKg) || !isPositive(scr)){
+                setCalcOutput("crclResult", "--");
+                setCalcError("crclError", "값을 모두 0보다 크게 입력하세요.");
+                return;
+            }
+            const maleValue = ((140 - age) * weightKg) / (72 * scr);
+            const gfr = document.getElementById("sex").value === "female" ? maleValue * 0.85 : maleValue;
+            const carboDose = 6 * (gfr + 25);
+            setCalcOutput("crclResult", `GFR ${formatCalc(gfr, "mL/min")} / Dose ${formatCalc(carboDose, "mg")}`);
+            setCalcError("crclError", "");
+        }
+
+        function calculateAll(){
+            [calculateFluidRate, calculateProportion, calculateBsa, calculateCrcl].forEach((fn) => {
+                try{ fn(); }catch(error){ console.error("계산기 오류:", error); }
+            });
+        }
+
+        // 계산기 탭(#tab-calc) 안에서 입력값이 바뀔 때마다 자동 계산
+        // (다른 스크립트가 먼저 걸려도 항상 동작하도록 가장 먼저 등록)
+        document.addEventListener("input", (event) => {
+            if(event.target.closest("#tab-calc")) calculateAll();
+        });
+        document.addEventListener("change", (event) => {
+            if(event.target.closest("#tab-calc")) calculateAll();
+        });
+
+        // 결과 복사 버튼
+        document.addEventListener("click", (event) => {
+            const btn = event.target.closest(".copy-result");
+            if(!btn) return;
+            const targetId = btn.dataset.copyTarget;
+            const value = targetId ? (document.getElementById(targetId)?.dataset.copyValue || "") : "";
+            if(!value){
+                alert("계산할 값을 먼저 입력하세요.");
+                return;
+            }
+            if(navigator.clipboard){
+                navigator.clipboard.writeText(value).then(() => alert("복사했습니다."));
+            }else{
+                alert(value);
+            }
+        });
+    })();
+    </script>
+    <script>
+    (function(){
+        function loadIcuCalculator(){
+            const frame = document.getElementById('icuCalcFrame');
+            const source = document.getElementById('icuCalculatorTemplate');
+            if(frame && source && !frame.srcdoc){
+                frame.srcdoc = source.innerHTML.trim();
+            }
+        }
+        if(document.readyState === 'loading'){
+            document.addEventListener('DOMContentLoaded', loadIcuCalculator);
+        }else{
+            loadIcuCalculator();
+        }
+    })();
+    </script>
+    <template id="icuCalculatorTemplate">
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SCH ICU 약물 계산기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #f0f2f5; --bg-header: #0055b8; --text-main: #333;
+            --bg-card: #ffffff; --border-color: #e0e0e0;
+            --bg-input-yellow: #fffde7; --text-input: #000;
+            --bg-th: #546e7a; --text-th: #fff;
+            --bg-red: #ffebee; --text-red: #c62828;
+            --bg-blue: #e3f2fd; --text-blue: #1565c0;
+            --bg-green: #e8f5e9; --text-green: #2e7d32;
+            --bg-yellow: #fffde7; --text-yellow: #f57f17;
+            --u-std: #1565c0; --u-vaso: #d32f2f; --u-mcgmin: #2e7d32;
+            --u-mghr: #ef6c00; --u-mcghr: #8e24aa;
+        }
+        body.dark-mode {
+            --bg-body: #121212; --bg-header: #1a237e; --text-main: #e0e0e0;
+            --bg-card: #1e1e1e; --border-color: #333;
+            --bg-input-yellow: #2c2c2c; --text-input: #fff000; --bg-th: #37474f;
+            --bg-red: #3e2723; --text-red: #ffcdd2;
+            --bg-blue: #0d47a1; --text-blue: #bbdefb;
+            --bg-green: #1b5e20; --text-green: #c8e6c9;
+            --bg-yellow: #4a4419; --text-yellow: #fff59d;
+            --u-std: #90caf9; --u-vaso: #ef9a9a; --u-mcgmin: #a5d6a7;
+            --u-mghr: #ffcc80; --u-mcghr: #ce93d8;
+        }
+        body { margin:0; padding:0; font-family:'Noto Sans KR',sans-serif; background:var(--bg-body); color:var(--text-main); -webkit-text-size-adjust:100%; transition:0.3s; }
+        .header { background:var(--bg-header); padding:20px 10px 15px 10px; position:sticky; top:0; z-index:1000; box-shadow:0 2px 8px rgba(0,0,0,0.3); display:flex; flex-direction:column; align-items:center; }
+        .btn-darkmode { position:absolute; top:15px; right:15px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.3); color:#fff; border-radius:50%; width:40px; height:40px; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+        .hospital-title { margin:0; font-size:2.3rem; font-weight:900; color:white; text-align:center; margin-bottom:5px; margin-top:15px; text-shadow:0 2px 4px rgba(0,0,0,0.3); line-height:1.1; }
+        .dept-title { margin:0 0 10px 0; font-size:1.5rem; font-weight:500; color:#bbdefb; opacity:0.95; }
+        .dept-switch-row { display:flex; width:100%; max-width:600px; gap:6px; margin-bottom:12px; }
+        .dept-btn { flex: 1; padding: 10px 0; border: 1px solid rgba(255,255,255,0.4); background: rgba(0,0,0,0.25); color: #ccc; border-radius: 8px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        #btn-sicu.active { background: #4db6ac; color: white; border-color: #80cbc4; box-shadow: 0 0 10px rgba(77,182,172, 0.6); transform: scale(1.02); }
+        #btn-ccu.active { background: #f06292; color: white; border-color: #f48fb1; box-shadow: 0 0 10px rgba(240,98,146, 0.6); transform: scale(1.02); }
+        #btn-micu.active { background: #7986cb; color: white; border-color: #9fa8da; box-shadow: 0 0 10px rgba(121,134,203, 0.6); transform: scale(1.02); }
+        .control-top-row { display:flex; width:100%; max-width:600px; gap:8px; margin-bottom:8px; justify-content: space-between; }
+        .weight-container { flex:0 0 auto; background: #d32f2f; border:1px solid rgba(255,255,255,0.3); border-radius:8px; padding:5px 15px; display:flex; align-items:center; gap:8px; }
+        .weight-label { font-size:1rem; font-weight:700; color:white; white-space:nowrap; }
+        .weight-input { width:70px; height:42px; border:2px solid #ffcdd2; border-radius:6px; text-align:center; font-size:1.7rem; font-weight:900; background:#fff; color:#d32f2f; }
+        .btn-group { display:flex; flex-wrap: wrap; justify-content: center; gap:4px; flex:1; }
+        .btn-common { flex: 1 1 30%; border-radius:8px; font-weight:800; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.2); padding:10px 0; font-size: 0.8rem; letter-spacing: -0.5px; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
+        .btn-vent { background:#009688; color:#fff; border:2px solid #00796b; }
+        .btn-yale { background:#7e57c2; color:#fff; border:2px solid #5e35b1; }
+        .btn-heparin { background:#ff9800; color:#fff; border:2px solid #f57c00; }
+        .btn-intubation { background:#3f51b5; color:#fff; border:2px solid #283593; }
+        .btn-setting { background:#fdd835; color:#000; border:2px solid #fbc02d; }
+        .mode-row { display:flex; gap:5px; width:100%; max-width:600px; margin-top: 5px; }
+        .mode-btn { flex:1; border:none; border-radius:6px; padding:12px 0; font-size:1rem; font-weight:700; cursor:pointer; background:rgba(0,0,0,0.25); color:#cfd8dc; transition:0.2s; white-space:nowrap; }
+        .mode-btn.active { background:#fff; color:var(--sch-blue); box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+        .table-wrap { padding:10px 5px 200px 5px; max-width:800px; margin:0 auto; }
+        table { width:100%; border-collapse:separate; border-spacing:0; background:var(--bg-card); border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+        th { background:var(--bg-th); color:var(--text-th); padding:8px 2px; font-size:0.78rem; font-weight:700; text-align:center; border-bottom:1px solid var(--border-color); }
+        td { text-align:center; vertical-align:middle; height:54px; border-bottom:1px solid var(--border-color); border-right:1px solid var(--border-color); padding:0; }
+        td:last-child { border-right:none; } tr:last-child td { border-bottom:none; }
+        .td-name { width:26%; padding:0 4px; font-weight:700; cursor:pointer; }
+        .drug-cell-container { display:flex; align-items:center; }
+        .copy-btn-area { padding-right:4px; display:flex; align-items:center; }
+        .copy-icon { font-size:0.9rem; color:var(--sch-blue); font-weight:900; cursor:pointer; padding:4px; }
+        .name-area { flex:1; text-align:center; }
+        .drug-title-row { display:flex; align-items:center; justify-content:center; gap:3px; }
+        .drug-title { font-size:0.9rem; line-height:1.05; margin-bottom:1px; word-break:break-all; }
+        .drug-mix-info { font-size:0.62rem; font-weight:500; opacity:0.8; display:block; color:inherit; line-height:1.08; }
+        .info-icon { font-size:0.8rem; opacity:0.6; border:1px solid currentColor; border-radius:50%; width:14px; height:14px; display:inline-flex; align-items:center; justify-content:center; }
+        .td-white { width:12%; background:var(--bg-card); color:var(--text-main); }
+        .input-mini { width:100%; border:none; text-align:center; font-size:1.15rem; font-weight:700; color:var(--text-main); background:transparent; padding:0; }
+        .td-input { width:18%; background:var(--bg-input-yellow); }
+        .input-dose { width:100%; height:100%; border:none; background:transparent; text-align:center; font-size:1.4rem; font-weight:900; color:var(--text-input); }
+        .td-unit { width:13%; background:var(--bg-input-yellow); font-size:0.8rem; font-weight:800; padding:0 1px; white-space:normal; line-height:1.1; }
+        .td-result { width:19%; font-weight:900; }
+        .res-val { font-size:1.32rem; display:block; line-height:1; }
+        .res-unit { font-size:0.7rem; font-weight:500; margin-top:2px; opacity:0.8; }
+        .txt-standard { color: var(--u-std) !important; }
+        .txt-vaso { color: var(--u-vaso) !important; }
+        .txt-mcgmin { color: var(--u-mcgmin) !important; }
+        .txt-mghr { color: var(--u-mghr) !important; }
+        .txt-mcghr { color: var(--u-mcghr) !important; }
+        .theme-red .td-name, .theme-red .td-result { background:var(--bg-red); color:var(--text-red); }
+        .theme-blue .td-name, .theme-blue .td-result { background:var(--bg-blue); color:var(--text-blue); }
+        .theme-green .td-name, .theme-green .td-result { background:var(--bg-green); color:var(--text-green); }
+        .theme-yellow .td-name, .theme-yellow .td-result { background:var(--bg-yellow); color:var(--text-yellow); }
+        .footer-bar { position:fixed; bottom:0; left:0; width:100%; background:var(--bg-card); border-top:1px solid var(--border-color); padding:10px; display:flex; flex-direction:column; align-items:center; box-shadow:0 -2px 10px rgba(0,0,0,0.1); z-index:2000; }
+        .btn-copy { width:95%; max-width:600px; padding:12px; background:#2196f3; color:white; border:none; border-radius:8px; font-size:1.1rem; font-weight:800; cursor:pointer; box-shadow:0 4px 6px rgba(0,0,0,0.2); }
+        .footer-disclaimer { width:95%; max-width:600px; font-size:0.65rem; color:var(--text-main); opacity:0.7; margin-top:6px; margin-bottom:2px; text-align:center; line-height:1.2; word-break:keep-all; }
+        .copyright-text { font-size: 0.65rem; color: #999; margin-top: 0; text-align: center; line-height: 1.2; font-weight: 500; }
+        .popup-panel { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); width:85%; max-width:350px; background:var(--bg-card); color:var(--text-main); z-index:3000; padding:20px; border-radius:12px; box-shadow:0 5px 25px rgba(0,0,0,0.5); max-height:80vh; overflow-y:auto; border:1px solid var(--border-color); }
+        .overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2500; }
+        .check-item { display:flex; align-items:center; margin:10px 0; font-size:1rem; font-weight:500; }
+        .bulk-btn-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn-bulk { flex: 1; padding: 10px; background: #e0e0e0; border: 1px solid #ccc; border-radius: 6px; font-weight: 700; cursor: pointer; color: #333; font-size: 0.9rem; }
+        .btn-confirm-final { width:100%; padding:15px; border:none; border-radius:8px; font-size:1.2rem; font-weight:900; cursor:pointer; margin-top:20px; margin-bottom:10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .btn-reset-final { width:100%; padding:10px; background:#e53935; color:white; border:none; border-radius:8px; font-size:0.9rem; font-weight:700; cursor:pointer; margin-top:10px; opacity:0.9; }
+        .btn-popup-close { width:100%; padding:10px; background:#555; color:white; border:none; border-radius:8px; margin-top:15px; font-size:1rem; font-weight:700; cursor:pointer; }
+        .vent-row { display:flex; align-items:center; gap:5px; justify-content: space-between; margin-bottom: 15px; }
+        .vent-label { font-weight:700; color:var(--sch-blue); }
+        .gender-btn { flex:1; padding:12px; border:1px solid #ccc; background:#f0f0f0; color:#666; cursor:pointer; font-weight:700; border-radius:6px; transition:0.2s; }
+        .gender-btn.active { background:#0055b8; color:#fff; border-color:#004ba0; box-shadow:0 2px 4px rgba(0,0,0,0.3); }
+        .vent-section-header { font-size:0.9rem; font-weight:900; color:#455a64; margin-top:15px; margin-bottom:5px; text-align:left; border-left:4px solid #009688; padding-left:8px; }
+        .vt-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:5px; }
+        .vt-item { background:#fff; padding:10px 5px; border-radius:6px; text-align:center; border:1px solid #b2dfdb; }
+        .vt-label { display:block; font-size:0.75rem; color:#00796b; margin-bottom:2px; }
+        .vt-val { font-size:1.2rem; font-weight:900; color:#004d40; }
+        .pbw-display { text-align:center; font-size:2rem; font-weight:900; color:#d32f2f; margin:10px 0; background:#ffebee; padding:10px; border-radius:8px; }
+        .btn-vent-print { width:100%; padding:12px; background:#607d8b; color:white; border:none; border-radius:8px; font-size:1rem; font-weight:800; cursor:pointer; margin-top:15px; box-shadow:0 4px 6px rgba(0,0,0,0.2); }
+        .free-input { flex:1; padding:8px; border:1px solid #ccc; border-radius:4px; font-size:1.1rem; text-align:center; font-weight:700; background:#fff; color:#333; }
+        .hep-protocol-box { border: 2px solid #ffcc80; border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .hep-protocol-title { background: #ffe0b2; color: #e65100; padding: 10px; font-weight: 900; text-align: center; border-bottom: 1px solid #ffcc80; }
+        .hep-calc-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #fff; border-bottom: 1px solid #eee; }
+        .hep-calc-label { font-size: 0.9rem; font-weight: 700; color: #555; }
+        .hep-calc-input { width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; font-weight: 700; font-size: 1rem; color: #e65100; }
+        .hep-calc-result { width: 80px; padding: 5px; background: #e3f2fd; border-radius: 4px; text-align: center; font-weight: 900; font-size: 1rem; color: #1565c0; }
+        .hep-section-header { background:#fff3e0; color:#e65100; padding:8px; font-weight:900; border-left:5px solid #ff9800; margin-top:20px; margin-bottom:10px; font-size:0.95rem; text-align:left; }
+        .hep-input-row { display:flex; align-items:center; gap:5px; margin-bottom:10px; }
+        .hep-input { width:80px; padding:10px; border:2px solid #ff9800; border-radius:6px; text-align:center; font-size:1.2rem; font-weight:700; color:#e65100; }
+        .hep-select { flex:1; padding:10px; border:1px solid #ccc; border-radius:6px; font-size:1rem; background:white; color:#333; }
+        .hep-action-box { background:#fbe9e7; padding:15px; border-radius:8px; text-align:center; margin-top:15px; border:2px solid #ff5722; }
+        .hep-action-text { font-size:1.1rem; font-weight:900; color:#bf360c; display:block; margin-bottom:5px; }
+        .hep-new-rate { font-size:2rem; font-weight:900; color:#d84315; }
+        .yale-result-box { margin-top:15px; padding:15px; border-radius:8px; display:none; line-height:1.5; font-size:0.9rem; color:white; animation:fadeInUp 0.3s ease-out; }
+        @keyframes fadeInUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        .yale-res-success { background:linear-gradient(135deg, #16a085, #27ae60); }
+        .yale-res-warning { background:linear-gradient(135deg, #d35400, #f39c12); }
+        .yale-res-danger { background:linear-gradient(135deg, #c0392b, #e74c3c); }
+        .yale-bold { font-weight:900; text-decoration:underline; font-size:1.05rem; }
+        .yale-small-inst { font-size:0.85em; opacity:0.95; line-height:1.3; display:block; margin:4px 0; }
+
+        @media (max-width: 640px) {
+            body { background:#eef3f8; }
+            .header { padding:14px 10px 12px; }
+            .hospital-title { font-size:1.35rem; margin-top:4px; }
+            .dept-title { font-size:1.05rem; margin-bottom:10px; }
+            .dept-switch-row,
+            .control-top-row,
+            .mode-row { max-width:none; }
+            .dept-btn,
+            .mode-btn { font-size:0.86rem; padding:10px 4px; }
+            .control-top-row { align-items:stretch; }
+            .weight-container { padding:6px 10px; }
+            .weight-label { font-size:0.85rem; }
+            .weight-input { width:58px; height:38px; font-size:1.35rem; }
+            .btn-common { min-height:44px; font-size:0.86rem; }
+            .table-wrap { padding:8px 8px 170px; max-width:none; }
+            table,
+            tbody { display:block; width:100%; background:transparent; box-shadow:none; border-radius:0; }
+            thead { display:none; }
+            tr {
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:2px;
+                margin:0 0 3px;
+                padding:3px;
+                background:var(--bg-card);
+                border:1px solid var(--border-color);
+                border-radius:8px;
+                box-shadow:0 1px 4px rgba(15,27,48,0.07);
+            }
+            td {
+                display:flex;
+                flex-direction:column;
+                justify-content:center;
+                width:auto !important;
+                min-height:28px;
+                height:auto;
+                border:0;
+                border-radius:6px;
+                padding:1px 4px;
+                text-align:center;
+                box-sizing:border-box;
+            }
+            td::before {
+                content:attr(data-label);
+                display:block;
+                margin-bottom:0;
+                color:#607084;
+                font-size:0.56rem;
+                font-weight:800;
+                line-height:1;
+            }
+            .td-name {
+                grid-column:1 / -1;
+                min-height:auto;
+                padding:3px 6px;
+                border-radius:7px;
+            }
+            .td-name::before { display:none; }
+            .drug-cell-container { justify-content:center; }
+            .copy-btn-area { padding-right:5px; }
+            .copy-icon { font-size:0.85rem; padding:1px; }
+            .drug-title { font-size:0.85rem; line-height:1; }
+            .info-icon { width:11px; height:11px; font-size:0.62rem; }
+            .drug-mix-info { font-size:0.58rem; margin-top:0; line-height:1; }
+            .td-input,
+            .td-unit { background:#fff8d9; }
+            .td-result {
+                grid-column:1 / -1;
+                min-height:32px;
+                border:1px solid currentColor;
+            }
+            .input-mini,
+            .input-dose {
+                min-height:20px;
+                font-size:0.92rem;
+                border-radius:5px;
+                background:rgba(255,255,255,0.55);
+            }
+            .td-unit select {
+                min-height:20px;
+                font-size:0.74rem !important;
+            }
+            .res-val { font-size:1.12rem; }
+            .res-unit { font-size:0.64rem; margin-top:0; }
+            .footer-bar { padding:9px 8px calc(9px + env(safe-area-inset-bottom)); }
+            .btn-copy { font-size:1rem; padding:12px; }
+            .footer-disclaimer { font-size:0.6rem; }
+            .popup-panel {
+                width:calc(100% - 28px);
+                max-width:420px;
+                padding:16px;
+                border-radius:14px;
+            }
+            .hep-calc-row,
+            .hep-input-row { gap:8px; }
+            .hep-calc-label { font-size:0.82rem; }
+            .hep-calc-input,
+            .hep-calc-result { width:72px; }
+        }
+
+        /* =============================================
+           PRINT STYLES - Ventilator 결과 출력 전용
+           ============================================= */
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+                color: black !important;
+                width: 100% !important;
+                height: auto !important;
+            }
+            .header, .footer-bar, .table-wrap, .overlay { display: none !important; }
+            .popup-panel { display: none !important; }
+            #vent-panel {
+                display: block !important;
+                position: static !important;
+                transform: none !important;
+                top: auto !important;
+                left: auto !important;
+                width: 200mm !important;
+                max-width: 200mm !important;
+                max-height: none !important;
+                overflow: visible !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                padding: 5mm 8mm !important;
+                margin: 0 !important;
+                background: white !important;
+                box-sizing: border-box !important;
+                zoom: 0.5 !important;
+                page-break-inside: avoid !important;
+            }
+            #vent-panel .btn-popup-close,
+            #vent-panel .btn-vent-print { display: none !important; }
+            #vent-panel h3 { color: #00796b !important; }
+            .gender-btn.active { background: #0055b8 !important; color: white !important; }
+            .pbw-display { background: #ffebee !important; color: #d32f2f !important; border-radius: 8px !important; }
+            .vent-section-header { border-left: 4px solid #009688 !important; color: #455a64 !important; }
+            .vt-item { background: #f9f9f9 !important; border: 1px solid #b2dfdb !important; border-radius: 6px !important; }
+            .vt-label { color: #00796b !important; }
+            .vt-val { color: #004d40 !important; }
+            .vent-row { display: flex !important; }
+            .vt-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 5px !important; }
+        }
+
+    </style>
+</head>
+<body>
+<div class="header">
+    <button class="btn-darkmode" onclick="toggleDarkMode()">🌙</button>
+    <h1 class="hospital-title">순천향대학교 천안병원</h1>
+    <h3 class="dept-title">중환자실 약물계산기</h3>
+    
+    <div class="dept-switch-row">
+        <button class="dept-btn" id="btn-sicu" onclick="setDept('SICU')">SICU</button>
+        <button class="dept-btn" id="btn-ccu" onclick="setDept('CCU')">CCU</button>
+        <button class="dept-btn" id="btn-micu" onclick="setDept('MICU')">MICU/EICU</button>
+    </div>
+
+    <div class="control-top-row">
+        <div class="weight-container">
+            <span class="weight-label">체중(kg)</span>
+            <input type="number" id="bw" class="weight-input" value="60" oninput="saveWeight(); calcAll(); calcPBW(); calcHeparin(); calcInduction();" step="0.5">
+        </div>
+        <div class="btn-group">
+            <button class="btn-common btn-vent" onclick="openVentCalc()">🌬️ Vent</button>
+            <button class="btn-common btn-yale" onclick="openYaleScale()">💉 Yale</button>
+            <button class="btn-common btn-heparin" onclick="openHeparinCalc()">🩸 Heparin</button>
+            <button class="btn-common btn-intubation" onclick="openIntubation()">💊 Intubation</button>
+            <button class="btn-common btn-setting" onclick="openSettings()">⚙️ 약물선택</button>
+        </div>
+    </div>
+    <div class="mode-row">
+        <button class="mode-btn active" id="btnMode0" onclick="setMode(0)">약물용량 ➜ cc/hr</button>
+        <button class="mode-btn" id="btnMode1" onclick="setMode(1)">cc/hr ➜ 약물용량</button>
+    </div>
+</div>
+
+<div class="table-wrap">
+    <table id="mainTable">
+        <thead>
+            <tr>
+                <th style="width:26%">약물명</th>
+                <th style="width:12%">약물<br>용량</th>
+                <th style="width:12%">총<br>수액량</th>
+                <th id="th-input" style="width:18%">처방</th>
+                <th style="width:13%">단위</th>
+                <th id="th-output" style="width:19%">속도</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+    <div id="empty-msg" class="empty-msg">선택된 약물이 없습니다.</div>
+</div>
+
+<div class="footer-bar">
+    <button class="btn-copy" onclick="copyEMR()">📋 EMR 기록 복사 (Copy Text)</button>
+    <div class="footer-disclaimer">
+        본 프로그램은 계산 편의를 돕는 보조 도구이며, 최종 투약 용량과 속도의 확인 책임은 사용자(의료인)에게 있습니다.<br>
+        반드시 EMR 처방과 이중 확인(Double Check) 하십시오. 개발자는 사용 결과에 대해 법적 책임을 지지 않습니다.
+    </div>
+    <div class="copyright-text">
+        Version 2.2 | Copyright © 2026 SCH Cheonan Hospital CCU. All rights reserved.
+    </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeAllPopups()"></div>
+
+<div id="hep-panel" class="popup-panel">
+    <h3 style="text-align:center; margin-top:0; color:#e65100; margin-bottom:5px;">🩸 Heparin Protocol</h3>
+    <div style="text-align:center; font-size:0.85rem; color:#666; margin-bottom:15px;">Standard Mix: <strong>25,000 U / 250 cc</strong> (100 U/cc)</div>
+    <div class="hep-protocol-box">
+        <div class="hep-protocol-title">Heparinization for ACS / MI<br><span style="font-size:0.8em; font-weight:500;">(Bolus 60U/kg, Rate 12U/kg/hr)</span></div>
+        <div style="padding:10px; background:#fff; text-align:center;">
+            <span style="font-size:0.9rem; color:#e65100; display:block;">Initial Bolus (60U/kg)</span>
+            <span id="hep-acs-bolus" style="font-size:1.5rem; font-weight:900; color:#bf360c;">0</span> Unit
+        </div>
+        <div class="hep-calc-row"><span class="hep-calc-label">U/kg/hr</span><input type="number" id="hep-acs-u-input" class="hep-calc-input" placeholder="12" oninput="calcHeparin()" step="0.01"><span style="font-weight:900;">➜</span><div class="hep-calc-result"><span id="hep-acs-cc-result">0.0</span> <span style="font-size:0.7em;">cc/hr</span></div></div>
+        <div class="hep-calc-row"><span class="hep-calc-label">cc/hr</span><input type="number" id="hep-acs-cc-input" class="hep-calc-input" placeholder="0" oninput="calcHeparin()" step="0.01"><span style="font-weight:900;">➜</span><div class="hep-calc-result"><span id="hep-acs-u-result">0.0</span> <span style="font-size:0.7em;">U/kg</span></div></div>
+    </div>
+    <div class="hep-protocol-box" style="border-color:#ffab91;">
+        <div class="hep-protocol-title" style="background:#ffccbc; color:#d84315;">Heparinization for PTE / DVT<br><span style="font-size:0.8em; font-weight:500;">(Bolus 80U/kg, Rate 18U/kg/hr)</span></div>
+        <div style="padding:10px; background:#fff; text-align:center;">
+            <span style="font-size:0.9rem; color:#d84315; display:block;">Initial Bolus (80U/kg)</span>
+            <span id="hep-pte-bolus" style="font-size:1.5rem; font-weight:900; color:#bf360c;">0</span> Unit
+        </div>
+        <div class="hep-calc-row"><span class="hep-calc-label">U/kg/hr</span><input type="number" id="hep-pte-u-input" class="hep-calc-input" placeholder="18" oninput="calcHeparin()" step="0.01"><span style="font-weight:900;">➜</span><div class="hep-calc-result"><span id="hep-pte-cc-result">0.0</span> <span style="font-size:0.7em;">cc/hr</span></div></div>
+        <div class="hep-calc-row"><span class="hep-calc-label">cc/hr</span><input type="number" id="hep-pte-cc-input" class="hep-calc-input" placeholder="0" oninput="calcHeparin()" step="0.01"><span style="font-weight:900;">➜</span><div class="hep-calc-result"><span id="hep-pte-u-result">0.0</span> <span style="font-size:0.7em;">U/kg</span></div></div>
+    </div>
+    <div class="hep-section-header">aPTT Adjustment (Nomogram)</div>
+    <div class="hep-input-row"><span style="font-weight:700; color:#bf360c;">현재 속도:</span><input type="number" id="hep-curr-rate" class="hep-input" placeholder="0" oninput="calcHeparinAdjustment()" step="0.01"><span style="font-weight:700;">cc/hr</span></div>
+    <div class="hep-input-row">
+        <span style="font-weight:700; color:#bf360c;">aPTT 결과:</span>
+        <select id="hep-aptt" class="hep-select" onchange="calcHeparinAdjustment()">
+            <option value="none">선택하세요</option>
+            <option value="<35">&lt; 35 (sec)</option>
+            <option value="35-45">35 - 45 (sec)</option>
+            <option value="46-70">46 - 70 (sec) [Target]</option>
+            <option value="71-90">71 - 90 (sec)</option>
+            <option value=">90">&gt; 90 (sec)</option>
+        </select>
+    </div>
+    <div class="hep-action-box">
+        <div style="margin-bottom:8px;"><span style="color:#bf360c; font-size:0.9rem;">추가 Bolus 용량</span><br><span id="hep-adj-bolus" style="font-size:1.4rem; font-weight:900;">0</span> Unit</div>
+        <span class="hep-action-text" id="hep-action-msg">조절 후 속도 (New Rate)</span>
+        <span id="hep-adj-rate" class="hep-new-rate">0.0</span><span style="font-weight:700; color:#d84315;">cc/hr</span>
+    </div>
+    <button class="btn-popup-close" onclick="closeAllPopups()">닫기</button>
+</div>
+<div id="vent-panel" class="popup-panel">
+    <h3 style="text-align:center; margin-top:0; color:#00796b; margin-bottom:15px;">🌬️ Ventilator Settings</h3>
+    <div class="vent-row">
+        <span class="vent-label">성별 (Gender)</span>
+        <div style="display:flex; gap:5px;">
+            <button class="gender-btn active" id="btn-male" onclick="setGender('male')">남성 (Male)</button>
+            <button class="gender-btn" id="btn-female" onclick="setGender('female')">여성 (Female)</button>
+        </div>
+    </div>
+    <div class="vent-row">
+        <span class="vent-label">신장 (Height)</span>
+        <input type="number" id="vent-height" class="free-input" placeholder="cm" oninput="calcPBW()">
+    </div>
+    <div class="pbw-display"><span id="pbw-val">0.0</span> kg</div>
+    <div class="vent-section-header">Without ARDS (6 ~ 8 ml/kg)</div>
+    <div class="vt-grid">
+        <div class="vt-item"><span class="vt-label">Target 6ml</span><span id="vt-6" class="vt-val">0</span></div>
+        <div class="vt-item"><span class="vt-label">Target 8ml</span><span id="vt-8" class="vt-val">0</span></div>
+    </div>
+    <div class="vent-section-header" style="border-color:#e53935; color:#c62828;">With ARDS (4 ~ 6 ml/kg)</div>
+    <div class="vt-grid">
+        <div class="vt-item" style="border-color:#ef9a9a;"><span class="vt-label" style="color:#c62828;">Target 4ml</span><span id="vt-4" class="vt-val" style="color:#b71c1c;">0</span></div>
+        <div class="vt-item" style="border-color:#ef9a9a;"><span class="vt-label" style="color:#c62828;">Target 6ml</span><span id="vt-6-ards" class="vt-val" style="color:#b71c1c;">0</span></div>
+    </div>
+    <button class="btn-vent-print" onclick="window.print()">🖨️ 결과 출력 (Print)</button>
+    <button class="btn-popup-close" onclick="closeAllPopups()">닫기</button>
+</div>
+
+<div id="yale-panel" class="popup-panel">
+    <h3 style="text-align:center; margin-top:0; color:#5e35b1; margin-bottom:10px;">💉 Yale Insulin Protocol</h3>
+    <div class="hep-section-header" style="border-left-color:#5e35b1; background:#ede7f6; color:#4527a0;">초기 투여 속도 계산</div>
+    <div>
+        <input type="number" id="yale-initBST" placeholder="수치 입력 (181 이상)" onkeydown="if(event.key === 'Enter'){calcYaleStart()}" style="width:100%; padding:10px; border:1px solid #bdc3c7; border-radius:6px; font-size:1rem; box-sizing:border-box; margin-bottom:10px;">
+        <button onclick="calcYaleStart()" style="width:100%; padding:12px; background:#154360; color:white; border:none; border-radius:6px; font-size:0.95rem; font-weight:700; cursor:pointer;">초기 투여량 계산</button>
+        <div id="yale-startRes" class="yale-result-box"></div>
+    </div>
+    <div class="hep-section-header" style="border-left-color:#5e35b1; background:#ede7f6; color:#4527a0;">속도 조정 (BST 변화 기반)</div>
+    <div>
+        <input type="number" id="yale-curRate" step="0.1" placeholder="현재 cc/hr" style="width:100%; padding:10px; border:1px solid #bdc3c7; border-radius:6px; font-size:1rem; box-sizing:border-box; margin-bottom:10px;">
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <div style="flex:1;">
+                <label style="font-size:0.8rem; color:#666;">이전 BST</label>
+                <input type="number" id="yale-prevBST" style="width:100%; padding:10px; border:1px solid #bdc3c7; border-radius:6px; font-size:1rem; box-sizing:border-box;">
+            </div>
+            <div style="flex:1;">
+                <label style="font-size:0.8rem; color:#666;">현재 BST</label>
+                <input type="number" id="yale-currBST" onkeydown="if(event.key === 'Enter'){calcYaleAdjust()}" style="width:100%; padding:10px; border:1px solid #bdc3c7; border-radius:6px; font-size:1rem; box-sizing:border-box;">
+            </div>
+        </div>
+        <label style="font-size:0.8rem; color:#666;">체크 간격(hr)</label>
+        <input type="number" id="yale-interval" value="1" style="width:100%; padding:10px; border:1px solid #bdc3c7; border-radius:6px; font-size:1rem; box-sizing:border-box; margin-bottom:10px;">
+        <button onclick="calcYaleAdjust()" style="width:100%; padding:12px; background:#34495e; color:white; border:none; border-radius:6px; font-size:0.95rem; font-weight:700; cursor:pointer;">분석 및 속도조정</button>
+        <div id="yale-adjRes" class="yale-result-box"></div>
+    </div>
+    <div style="text-align:center; margin-bottom:10px;">
+        <a href="https://doi.org/10.1177/10600280221074683" target="_blank" style="color:#7f8c8d; font-size:0.7rem; text-decoration:none; opacity:0.8;">Reference: 10.1177/10600280221074683</a>
+    </div>
+    <button class="btn-popup-close" onclick="closeAllPopups()">닫기</button>
+</div>
+
+<div id="intubation-panel" class="popup-panel">
+    <h3 style="text-align:center; margin-top:0; color:#3f51b5; margin-bottom:15px;">💊 Intubation</h3>
+    <div style="text-align:center; font-size:0.9rem; color:#555; margin-bottom:15px;">
+        현재 체중: <strong id="ind-bw-disp" style="font-size:1.3rem; color:#d32f2f;">60</strong> kg
+    </div>
+    <div class="hep-protocol-box" style="border-color:#9fa8da;">
+        <div class="hep-protocol-title" style="background:#c5cae9; color:#1a237e;">Propofol (20mg/cc)</div>
+        <div class="hep-calc-row">
+            <span class="hep-calc-label">Dose (mg/kg)</span>
+            <input type="number" id="ind_propo_dose" class="hep-calc-input" value="1.0" step="0.1" oninput="calcInduction()">
+        </div>
+        <div class="hep-calc-row" style="background:#e8eaf6;">
+            <span class="hep-calc-label" style="color:#1a237e; font-weight:900;">주입량 (cc)</span>
+            <span style="font-weight:900; color:#5c6bc0;">➜</span>
+            <div class="hep-calc-result" style="background:#fff; color:#d32f2f; font-size:1.2rem; border:1px solid #c5cae9;"><span id="ind_propo_res">0.00</span></div>
+        </div>
+    </div>
+    <div class="hep-protocol-box" style="border-color:#9fa8da;">
+        <div class="hep-protocol-title" style="background:#c5cae9; color:#1a237e;">Ketamine (50mg/cc)</div>
+        <div class="hep-calc-row">
+            <span class="hep-calc-label">Dose (mg/kg)</span>
+            <input type="number" id="ind_keta_dose" class="hep-calc-input" value="1.0" step="0.1" oninput="calcInduction()">
+        </div>
+        <div class="hep-calc-row" style="background:#e8eaf6;">
+            <span class="hep-calc-label" style="color:#1a237e; font-weight:900;">주입량 (cc)</span>
+            <span style="font-weight:900; color:#5c6bc0;">➜</span>
+            <div class="hep-calc-result" style="background:#fff; color:#d32f2f; font-size:1.2rem; border:1px solid #c5cae9;"><span id="ind_keta_res">0.00</span></div>
+        </div>
+    </div>
+    <button class="btn-popup-close" onclick="closeAllPopups()">닫기</button>
+</div>
+
+<div id="selection-panel" class="popup-panel">
+    <h3 style="text-align:center; margin-top:0;">약물 목록 선택</h3>
+    <div class="bulk-btn-row">
+        <button class="btn-bulk" onclick="toggleCheckboxes(true)">전체 선택</button>
+        <button class="btn-bulk" onclick="toggleCheckboxes(false)">전체 해제</button>
+    </div>
+    <div id="checklist-container"></div>
+    <button class="btn-confirm-final" onclick="closeAllPopups()" style="background-color: #0055b8 !important; color: #ffffff !important;">✅ 선택 완료 (확인)</button>
+    <button class="btn-reset-final" onclick="resetAllData()">⚠️ 데이터 초기화 (모든 설정 리셋)</button>
+</div>
+
+<div id="info-panel" class="popup-panel">
+    <div id="info-title" class="info-title">약물 정보</div>
+    <div id="info-content" class="info-content"></div>
+    <button class="btn-popup-close" onclick="closeAllPopups()">닫기</button>
+</div>
+
+<script>
+    let currentMode = 0; 
+    let currentDept = localStorage.getItem('sch_icu_dept') || 'CCU'; 
+
+    const drugs = [
+        { id: 'norepi', name: 'Norepinephrine', sub: '(4mg/4ml/1amp)<br>(20mg/20ml/1amp)', amt: 20, vol: 200, unit: 'mcg/kg/min', type: 1, color: 'red', uTxt: 'txt-standard', info: "* Maintenance: 0.01~0.3 mcg/kg/min (Max 0.5)\n* Standard mix: 20mg + D5W 200ml" },
+        { id: 'epi', name: 'Epinephrine', sub: '(1mg/1amp)', amt: 4, vol: 200, unit: 'mcg/kg/min', type: 1, color: 'red', uTxt: 'txt-standard', info: "* Maintenance: 0.01~0.03 mcg/kg/min (증량 가능)\n* Standard mix: 4mg + D5W 200ml" },
+        { id: 'vaso', name: 'Vasopressin', sub: '(20IU/1amp)', amt: 20, vol: 100, unit: 'Unit/min', type: 2, color: 'red', uTxt: 'txt-vaso', info: "* Maintenance: 0.01~0.04 unit/min (Max 0.1)\n* Standard mix: 20IU + D5W 100ml" },
+        { id: 'dobu', name: 'Dobutamine', sub: '(250mg/1amp)', amt: 500, vol: 250, unit: 'mcg/kg/min', type: 1, color: 'red', uTxt: 'txt-standard', info: "* Maintenance: 1~6 mcg/kg/min (Max 20)\n* Standard mix: 500mg + D5W 250ml" },
+        { id: 'dopa', name: 'Dopamine', sub: '(200mg/1amp)', amt: 400, vol: 250, unit: 'mcg/kg/min', type: 1, color: 'red', uTxt: 'txt-standard', info: "* Maintenance: 2~30 mcg/kg/min\n* Standard mix: 400mg + D5W 200ml" },
+        { id: 'ntg', name: 'Nitroglycerin', sub: '(50mg/50cc/1vial)', amt: 50, vol: 50, unit: 'mcg/kg/min', type: 1, color: 'green', uTxt: 'txt-standard', info: "* Start dose: 5 mcg/min\n* Inc by 5 mcg/min every 3~5min (Max 20)\n* Standard mix: 100mg + D5W 200ml" },
+        { id: 'mc_ntg', name: 'MC Nitroglycerin', sub: '(100mg/500cc)', amt: 100, vol: 500, unit: 'mcg/min', type: 5, color: 'green', uTxt: 'txt-mcgmin', info: "* Start dose: 5 mcg/min\n* Inc by 5 mcg/min every 3~5min (Max 20)\n* Standard mix: 100mg + D5W 200ml" },
+        { id: 'esmolol', name: 'Esmolol', sub: '(100mg/10ml/1vial)', amt: 2000, vol: 500, unit: 'mcg/kg/min', type: 1, color: 'green', uTxt: 'txt-standard', info: "* Range: 50 ~ 200 mcg/kg/min\n* Standard mix: 2000mg + NS 500ml" },
+        { id: 'nicar', name: 'Nicardipine', sub: '(10mg/10ml/1amp)', amt: 100, vol: 200, unit: 'mcg/kg/min', type: 1, color: 'green', uTxt: 'txt-standard', info: "* Range: 0.5 ~ 6 mcg/kg/min\n* Standard mix: 100mg + NS 200ml" },
+        { id: 'diltia', name: 'Diltiazem', sub: '(50mg/1vial)', amt: 100, vol: 100, unit: 'mg/hr', type: 6, color: 'green', uTxt: 'txt-mghr', info: "* Range: 5 ~ 15 mg/hr\n* Standard mix: 100mg + NS 100ml" },
+        { id: 'iso', name: 'Isoproterenol', sub: '(0.2mg/1ml/1amp)', amt: 1, vol: 100, unit: 'mcg/min', type: 5, color: 'green', uTxt: 'txt-mcgmin', info: "* Maintenance: 0.5~5 mcg/min (Max 20)\n* Standard mix: 1mg + NS/5DW 100ml" },
+        { id: 'milri', name: 'Milrinone', sub: '(10mg/10ml/1amp)', amt: 20, vol: 100, unit: 'mcg/kg/min', type: 1, color: 'green', uTxt: 'txt-standard', info: "* Loading: 50mcg/kg (10min)\n* Maintenance: 0.375~0.75 mcg/kg/min" },
+        { id: 'remi', name: 'Remifentanil', sub: '(5mg/1vial)', amt: 10, vol: 100, unit: 'mcg/kg/min', type: 1, color: 'blue', uTxt: 'txt-standard', info: "* Maintenance: 0.025~0.2 mcg/kg/min\n* Standard mix: 10mg + D5W 100ml" },
+        { id: 'propo', name: 'Propofol', sub: '(1000mg/50cc/1bt)', amt: 1000, vol: 50, unit: 'mg/kg/hr', type: 3, color: 'blue', uTxt: 'txt-mghr', info: "* Loading: 0.5~1 mg/kg\n* Maintenance: 0.1~2 mg/kg/hr (Max 4)\n* Standard mix: Premix" },
+        { id: 'precedex', name: 'Dexmedetomidine', sub: '(1000mcg/250ml/1bt)', amt: 1000, vol: 250, unit: 'mcg/kg/hr', type: 7, color: 'blue', uTxt: 'txt-mcghr', info: "* Maintenance: 0.1~0.6 mcg/kg/hr (Max 0.7)\n* Standard mix: 200mcg + NS 50ml (NS premix)" },
+        { id: 'vecu', name: 'Vecuronium', sub: '(10mg/1vial)', amt: 50, vol: 50, unit: 'mcg/kg/min', type: 1, color: 'blue', uTxt: 'txt-standard', info: "* Loading: 0.05~0.1 mg/kg\n* Maintenance: 0.8~1.2 mcg/kg/min\n* Standard mix: 50mg + D5W 50ml" },
+        { id: 'rocu', name: 'Rocuronium', sub: '(50mg/5ml/1vial)', amt: 1000, vol: 250, unit: 'mg/kg/hr', type: 3, color: 'blue', uTxt: 'txt-mghr', info: "* Range: 0.2 ~ 0.7 mg/kg/hr\n* Standard mix: 1000mg + NS 250ml" },
+        { id: 'mida', name: 'Midazolam', sub: '(15mg/3cc, 5mg/5cc, 3mg/3cc)', amt: 100, vol: 100, unit: 'mg/kg/hr', type: 3, color: 'blue', uTxt: 'txt-mghr', info: "* Maintenance: 0.01~0.1 mg/kg/hr (Max 0.2)\n* IV bolus: 0.02~0.08 mg/kg\n* Standard mix: 100mg + D5W 100ml" },
+        { id: 'keta', name: 'Ketamine', sub: '(500mg/10ml/1vial)', amt: 500, vol: 200, unit: 'mcg/kg/min', type: 1, color: 'blue', uTxt: 'txt-standard', info: "* Loading: 0.5~1 mg/kg (1분 이상)\n* Maintenance: 1~10 mcg/kg/min (Max 20)\n* Standard mix: 500mg + D5W 200ml" },
+        { id: 'morphine', name: 'Morphine', sub: '(10mg/1ml/1amp)<br>(15mg/1ml/1amp)', amt: 100, vol: 100, unit: 'mg/hr', type: 6, color: 'blue', uTxt: 'txt-mghr', info: "* Maintenance: 0.5~5 mg/hr (Max 35)\n* Standard mix: 100mg + D5W 100ml" },
+        { id: 'hydro', name: 'Hydromorphone', sub: '(2mg/1ml/1amp)', amt: 20, vol: 100, unit: 'mg/hr', type: 6, color: 'blue', uTxt: 'txt-mghr', info: "* Maintenance: 0.25~4 mg/hr\n* Standard mix: 20mg + NS 100ml" },
+        { id: 'sufen', name: 'Sufentanil citrate', sub: '(250mcg/5ml/1amp)<br>(50mcg/1ml/1amp)', amt: 250, vol: 50, unit: 'mcg/kg/hr', type: 7, color: 'blue', uTxt: 'txt-mcghr', info: "* Standard mix: 250mcg + NS 50ml\n* Dose unit: mcg/kg/hr" },
+        { id: 'fenta', name: 'Fentanyl', sub: '(1000mcg/20ml/1amp)', amt: 2000, vol: 50, unit: 'mcg/kg/hr', type: 7, color: 'blue', uTxt: 'txt-mcghr', info: "* Standard mix: 2000mcg + D5W 50ml\n* Dose unit: mcg/kg/hr" },
+        { id: 'freecalc', name: '자유계산', sub: '(사용자 설정)', amt: 100, vol: 100, unit: 'mg/hr', type: 6, color: 'yellow', uTxt: 'txt-mghr', info: "* 자유롭게 농도와 용량을 설정하여 계산할 수 있습니다." }
+    ];
+
+    const ccuMix = { 'norepi': { amt: 4, vol: 50 }, 'epi': { amt: 4, vol: 50 }, 'dobu': { amt: 250, vol: 50 }, 'dopa': { amt: 200, vol: 50 } };
+    const micuMix = { 'precedex': { amt: 400, vol: 100 } };
+    const ccuExclude = ['esmolol', 'nicar', 'diltia', 'iso', 'milri', 'rocu', 'hydro', 'fenta'];
+    const sicuExclude = ['esmolol', 'rocu', 'hydro', 'fenta', 'diltia', 'iso'];
+
+    let savedInputs = JSON.parse(localStorage.getItem('sch_icu_inputs')) || {};
+    let savedMix = JSON.parse(localStorage.getItem('sch_icu_mix')) || {};
+    let activeDrugs = JSON.parse(localStorage.getItem('sch_icu_v73_active'));
+    if (!activeDrugs) activeDrugs = drugs.map(d => d.id);
+
+    drugs.forEach(d => { if(!savedInputs[d.id]) savedInputs[d.id] = {0: '', 1: ''}; });
+
+    const tableBody = document.getElementById('tableBody');
+    const checklistContainer = document.getElementById('checklist-container');
+    const thInput = document.getElementById('th-input');
+    const thOutput = document.getElementById('th-output');
+    const btnMode0 = document.getElementById('btnMode0');
+    const btnMode1 = document.getElementById('btnMode1');
+
+    function init() {
+        setDept(currentDept, false); 
+        const savedBw = localStorage.getItem('sch_icu_weight');
+        if(savedBw) document.getElementById('bw').value = savedBw;
+        renderChecklist();
+        renderTable();
+        calcInduction();
+        if(localStorage.getItem('sch_icu_darkmode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.querySelector('.btn-darkmode').innerText = '☀️';
+        }
+    }
+
+    function saveWeight() { 
+        localStorage.setItem('sch_icu_weight', document.getElementById('bw').value); 
+        calcInduction();
+    }
+    
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        document.querySelector('.btn-darkmode').innerText = isDark ? '☀️' : '🌙';
+        localStorage.setItem('sch_icu_darkmode', isDark);
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        if (mode === 0) {
+            btnMode0.className = 'mode-btn active'; btnMode1.className = 'mode-btn';
+            thInput.innerText = "처방"; thOutput.innerText = "속도";
+        } else {
+            btnMode0.className = 'mode-btn'; btnMode1.className = 'mode-btn active';
+            thInput.innerText = "속도"; thOutput.innerText = "처방";
+        }
+        renderTable();
+    }
+
+    function setDept(dept, forceReset = true) {
+        currentDept = dept;
+        localStorage.setItem('sch_icu_dept', dept);
+        document.querySelectorAll('.dept-btn').forEach(btn => btn.className = 'dept-btn');
+        let targetId = '';
+        if(dept === 'SICU') targetId = 'btn-sicu';
+        if(dept === 'CCU') targetId = 'btn-ccu';
+        if(dept === 'MICU') targetId = 'btn-micu';
+        if(targetId) document.getElementById(targetId).className = 'dept-btn active';
+
+        if (forceReset) {
+            ['norepi', 'epi', 'dobu', 'dopa', 'precedex'].forEach(id => { if (savedMix[id]) delete savedMix[id]; });
+            localStorage.setItem('sch_icu_mix', JSON.stringify(savedMix));
+            renderTable();
+        }
+    }
+
+    function renderTable() {
+        tableBody.innerHTML = '';
+        let count = 0;
+        drugs.forEach(d => {
+            if (currentDept === 'CCU' && ccuExclude.includes(d.id)) return;
+            if (currentDept === 'SICU' && sicuExclude.includes(d.id)) return;
+            if (!activeDrugs.includes(d.id)) return;
+            count++;
+            const row = document.createElement('tr');
+            row.className = `theme-${d.color}`;
+            
+            let val = savedInputs[d.id][currentMode];
+            let currentAmt = d.amt;
+            let currentVol = d.vol;
+            let currentSub = d.sub;
+
+            if (currentDept === 'CCU' && ccuMix[d.id]) { 
+                currentAmt = ccuMix[d.id].amt; currentVol = ccuMix[d.id].vol; 
+            }
+            if (currentDept === 'MICU' && d.id === 'precedex') { 
+                currentAmt = micuMix['precedex'].amt; currentVol = micuMix['precedex'].vol; 
+                currentSub = '(400mcg/100ml)'; 
+            }
+
+            if (savedMix[d.id]) { currentAmt = savedMix[d.id].amt; currentVol = savedMix[d.id].vol; }
+
+            let doseUnit = d.unit.replace('Unit','U'); 
+            let inputUnit = currentMode === 0 ? doseUnit : "cc/hr";
+            let outputUnit = currentMode === 0 ? "cc/hr" : doseUnit;
+            let amtUnit = 'mg'; if(d.id === 'vaso') amtUnit = 'IU'; if(d.id === 'precedex' || d.id === 'sufen' || d.id === 'fenta' || d.id === 'iso') amtUnit = 'mcg';
+            
+            let unitCell = '';
+            if (d.id === 'freecalc') {
+                unitCell = '<td class="td-unit ' + d.uTxt + '" data-label="단위"><select id="unit_freecalc" onchange="changeUnit(\'freecalc\')" style="width:100%; padding:5px; font-size:0.75rem; font-weight:800; text-align:center; background:transparent; border:none; color:inherit;">';
+                const units = [ {v:'mcg/kg/min', t:1, l:'mcg/kg/min'}, {v:'Unit/min', t:2, l:'U/min'}, {v:'mg/kg/hr', t:3, l:'mg/kg/hr'}, {v:'mcg/min', t:5, l:'mcg/min'}, {v:'mg/hr', t:6, l:'mg/hr'}, {v:'mcg/kg/hr', t:7, l:'mcg/kg/hr'} ];
+                units.forEach(u => { const sel = d.unit === u.v ? ' selected' : ''; unitCell += '<option value="' + u.v + '" data-type="' + u.t + '"' + sel + '>' + u.l + '</option>'; });
+                unitCell += '</select></td>';
+            } else {
+                unitCell = '<td class="td-unit ' + d.uTxt + '" data-label="단위">' + inputUnit + '</td>';
+            }
+            
+            row.innerHTML = `
+                <td class="td-name" onclick="showInfo('${d.id}')">
+                    <div class="drug-cell-container">
+                        <div class="copy-btn-area"><span class="copy-icon" onclick="copyMixInfo('${d.id}', '${amtUnit}', event)">※</span></div>
+                        <div class="name-area">
+                            <div class="drug-title-row"><span class="drug-title">${d.name}</span><span class="info-icon">ⓘ</span></div>
+                            <span class="drug-mix-info">${currentSub}</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="td-white" data-label="약물총량"><input type="number" step="5" class="input-mini" id="amt_${d.id}" value="${currentAmt}" oninput="updateMix('${d.id}')"></td>
+                <td class="td-white" data-label="희석량"><input type="number" step="10" class="input-mini" id="vol_${d.id}" value="${currentVol}" oninput="updateMix('${d.id}')"></td>
+                <td class="td-input" data-label="입력값"><input type="number" step="0.01" class="input-dose" id="input_${d.id}" value="${val}" placeholder="0" oninput="handleInput('${d.id}')"></td>
+                ${unitCell}
+                <td class="td-result" data-label="계산결과"><span id="output_${d.id}" class="res-val">0.00</span><span class="res-unit">${outputUnit}</span></td>
+            `;
+            tableBody.appendChild(row);
+            setTimeout(() => calc(d.id), 0);
+        });
+
+        document.getElementById('empty-msg').style.display = count === 0 ? 'block' : 'none';
+    }
+
+    function openIntubation() {
+        document.getElementById('ind-bw-disp').innerText = document.getElementById('bw').value || 0;
+        document.getElementById('intubation-panel').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+        calcInduction();
+    }
+    
+    function calcInduction() {
+        const bw = parseFloat(document.getElementById('bw').value) || 0;
+        const pDose = parseFloat(document.getElementById('ind_propo_dose').value) || 0;
+        document.getElementById('ind_propo_res').innerText = ((bw * pDose) / 20).toFixed(2);
+        const kDose = parseFloat(document.getElementById('ind_keta_dose').value) || 0;
+        document.getElementById('ind_keta_res').innerText = ((bw * kDose) / 50).toFixed(2);
+    }
+
+    let ventGender = 'male';
+    function openVentCalc() { document.getElementById('vent-panel').style.display = 'block'; document.getElementById('overlay').style.display = 'block'; calcPBW(); }
+    function setGender(gender) { ventGender = gender; document.getElementById('btn-male').className = gender === 'male' ? 'gender-btn active' : 'gender-btn'; document.getElementById('btn-female').className = gender === 'female' ? 'gender-btn active' : 'gender-btn'; calcPBW(); }
+    function calcPBW() { const height = parseFloat(document.getElementById('vent-height').value) || 0; let pbw = 0; if (height > 0) { if (ventGender === 'male') pbw = 50 + 0.91 * (height - 152.4); else pbw = 45.5 + 0.91 * (height - 152.4); } document.getElementById('pbw-val').innerText = pbw.toFixed(1); document.getElementById('vt-6').innerText = Math.round(pbw * 6); document.getElementById('vt-8').innerText = Math.round(pbw * 8); document.getElementById('vt-4').innerText = Math.round(pbw * 4); document.getElementById('vt-6-ards').innerText = Math.round(pbw * 6); }
+    function openYaleScale() { document.getElementById('yale-panel').style.display = 'block'; document.getElementById('overlay').style.display = 'block'; }
+    function openHeparinCalc() { document.getElementById('hep-panel').style.display = 'block'; document.getElementById('overlay').style.display = 'block'; calcHeparin(); calcHeparinAdjustment(); }
+    function calcHeparin() { const weight = parseFloat(document.getElementById('bw').value) || 0; document.getElementById('hep-acs-bolus').innerText = weight * 60; document.getElementById('hep-pte-bolus').innerText = weight * 80; const inputU_ACS = parseFloat(document.getElementById('hep-acs-u-input').value); if (!isNaN(inputU_ACS)) document.getElementById('hep-acs-cc-result').innerText = ((inputU_ACS * weight) / 100).toFixed(1); else document.getElementById('hep-acs-cc-result').innerText = "0.0"; const inputCC_ACS = parseFloat(document.getElementById('hep-acs-cc-input').value); if (!isNaN(inputCC_ACS)) document.getElementById('hep-acs-u-result').innerText = ((inputCC_ACS * 100) / weight).toFixed(1); else document.getElementById('hep-acs-u-result').innerText = "0.0"; const inputU_PTE = parseFloat(document.getElementById('hep-pte-u-input').value); if (!isNaN(inputU_PTE)) document.getElementById('hep-pte-cc-result').innerText = ((inputU_PTE * weight) / 100).toFixed(1); else document.getElementById('hep-pte-cc-result').innerText = "0.0"; const inputCC_PTE = parseFloat(document.getElementById('hep-pte-cc-input').value); if (!isNaN(inputCC_PTE)) document.getElementById('hep-pte-u-result').innerText = ((inputCC_PTE * 100) / weight).toFixed(1); else document.getElementById('hep-pte-u-result').innerText = "0.0"; }
+    function calcHeparinAdjustment() { const weight = parseFloat(document.getElementById('bw').value) || 0; const currentRate = parseFloat(document.getElementById('hep-curr-rate').value) || 0; const aptt = document.getElementById('hep-aptt').value; let bolus = 0; let changeRateU = 0; let msg = "속도 조절 (Adjust Rate)"; if (aptt === '<35') { bolus = weight * 80; changeRateU = 4; } else if (aptt === '35-45') { bolus = weight * 40; changeRateU = 2; } else if (aptt === '46-70') { bolus = 0; changeRateU = 0; msg = "유지 (No Change)"; } else if (aptt === '71-90') { bolus = 0; changeRateU = -2; } else if (aptt === '>90') { bolus = 0; changeRateU = -3; msg = "1hr Stop & Decrease"; } else { document.getElementById('hep-adj-bolus').innerText = "0"; document.getElementById('hep-adj-rate').innerText = "0.0"; document.getElementById('hep-action-msg').innerText = "조절 후 속도"; return; } const changeCC = (weight * changeRateU) / 100; let newRate = currentRate + changeCC; if(newRate < 0) newRate = 0; document.getElementById('hep-adj-bolus').innerText = bolus; document.getElementById('hep-adj-rate').innerText = newRate.toFixed(1); document.getElementById('hep-action-msg').innerText = msg; }
+    function updateMix(id) { const newAmt = parseFloat(document.getElementById(`amt_${id}`).value); const newVol = parseFloat(document.getElementById(`vol_${id}`).value); if(!savedMix[id]) savedMix[id] = {}; savedMix[id].amt = newAmt; savedMix[id].vol = newVol; localStorage.setItem('sch_icu_mix', JSON.stringify(savedMix)); calc(id); }
+    function handleInput(id) { const val = document.getElementById(`input_${id}`).value; savedInputs[id][currentMode] = val; localStorage.setItem('sch_icu_inputs', JSON.stringify(savedInputs)); calc(id); }
+    function calc(id) { const drug = drugs.find(d => d.id === id); const weight = parseFloat(document.getElementById('bw').value) || 0; let currentAmt = parseFloat(document.getElementById(`amt_${id}`).value); let currentVol = parseFloat(document.getElementById(`vol_${id}`).value); if (isNaN(currentAmt)) currentAmt = drug.amt; if (isNaN(currentVol)) currentVol = drug.vol; const inputVal = parseFloat(savedInputs[id][currentMode]) || 0; const outputEl = document.getElementById(`output_${id}`); if (currentAmt === 0 || currentVol === 0) { outputEl.innerText = "Err"; return; } let conc = 0; if ([1, 4, 5].includes(drug.type)) { conc = (currentAmt * 1000) / currentVol; } else if (drug.type === 2) { conc = currentAmt / currentVol; } else if (drug.type === 3 || drug.type === 6) { conc = currentAmt / currentVol; } else if (drug.type === 7) { conc = currentAmt / currentVol; } let result = 0; if (currentMode === 0) { if (drug.type === 1) { if (weight > 0) result = (inputVal * weight * 60) / conc; } else if (drug.type === 2) { result = (inputVal * 60) / conc; } else if (drug.type === 3) { if (weight > 0) result = (inputVal * weight) / conc; } else if (drug.type === 4) { if (weight > 0) result = (inputVal * weight) / conc; } else if (drug.type === 5) { result = (inputVal * 60) / conc; } else if (drug.type === 6) { result = inputVal / conc; } else if (drug.type === 7) { if (weight > 0) result = (inputVal * weight) / conc; } } else { if (drug.type === 1) { if (weight > 0) result = (inputVal * conc) / (weight * 60); } else if (drug.type === 2) { result = (inputVal * conc) / 60; } else if (drug.type === 3) { if (weight > 0) result = (inputVal * conc) / weight; } else if (drug.type === 4) { if (weight > 0) result = (inputVal * conc) / weight; } else if (drug.type === 5) { result = (inputVal * conc) / 60; } else if (drug.type === 6) { result = inputVal * conc; } else if (drug.type === 7) { if (weight > 0) result = (inputVal * conc) / weight; } } outputEl.innerText = inputVal === 0 ? "0.00" : result.toFixed(2); }
+    function calcAll() { activeDrugs.forEach(id => { if(document.getElementById(`input_${id}`)) calc(id); }); }
+    function changeUnit(id) { const select = document.getElementById('unit_' + id); const selectedOption = select.options[select.selectedIndex]; const newUnit = selectedOption.value; const newType = parseInt(selectedOption.getAttribute('data-type')); const drug = drugs.find(d => d.id === id); if (drug) { drug.unit = newUnit; drug.type = newType; calc(id); const outputCell = document.querySelector('#output_' + id).parentElement; let doseUnit = newUnit.replace('Unit','U'); let outputUnit = currentMode === 0 ? 'cc/hr' : doseUnit; const currentVal = document.getElementById('output_' + id).innerText; outputCell.innerHTML = '<span id="output_' + id + '" class="res-val">' + currentVal + '</span><span class="res-unit">' + outputUnit + '</span>'; } }
+    function copyMixInfo(id, unit, e) { e.stopPropagation(); const drug = drugs.find(d => d.id === id); const curAmt = document.getElementById(`amt_${id}`).value; const curVol = document.getElementById(`vol_${id}`).value; const text = `${drug.name} ${curAmt}${unit} + (   ) ${curVol}cc`; navigator.clipboard.writeText(text).then(() => { alert(`[라벨 복사 완료]\n${text}`); }); }
+    function showInfo(id) { const drug = drugs.find(d => d.id === id); if(!drug) return; document.getElementById('info-title').innerText = drug.name; document.getElementById('info-content').innerText = drug.info || "정보가 없습니다."; document.getElementById('info-panel').style.display = 'block'; document.getElementById('overlay').style.display = 'block'; }
+    function toggleCheckboxes(checkStatus) { const checkboxes = document.querySelectorAll('#checklist-container input[type="checkbox"]'); checkboxes.forEach(cb => cb.checked = checkStatus); }
+    function calcYaleStart() { const bst = parseFloat(document.getElementById('yale-initBST').value); const res = document.getElementById('yale-startRes'); if(!bst) { alert("BST 수치를 입력해주세요."); return; } if(bst <= 180) { res.style.display = "block"; res.className = "yale-result-box yale-res-warning"; res.innerHTML = "BST 180 이하는 프로토콜 시작 대상이 아닙니다."; return; } const rate = (Math.round((bst / 100) * 2) / 2).toFixed(1); let bolusText = "Bolus 없음"; if (bst >= 300) { const bolus = Math.round(bst / 100); const maxBolus = Math.min(bolus, 14); bolusText = `RI <span class="yale-bold">${maxBolus} units</span> IV Bolus 투여`; } res.style.display = "block"; res.className = "yale-result-box yale-res-success"; res.innerHTML = `➔ <b>${bolusText}</b><br>➔ 주입 속도: <b><span class="yale-bold">${rate} cc/hr</span></b>`; }
+    function calcYaleAdjust() { const rate = parseFloat(document.getElementById('yale-curRate').value); const prev = parseFloat(document.getElementById('yale-prevBST').value); const curr = parseFloat(document.getElementById('yale-currBST').value); const time = parseFloat(document.getElementById('yale-interval').value); const res = document.getElementById('yale-adjRes'); if(isNaN(rate) || isNaN(prev) || isNaN(curr)) { alert("모든 수치를 입력해주세요."); return; } const change = (prev - curr) / time; let delta; if (rate < 3) delta = 0.5; else if (rate <= 6) delta = 1.0; else if (rate <= 9.5) delta = 1.5; else if (rate <= 14.5) delta = 2.0; else if (rate <= 19.5) delta = 3.0; else if (rate <= 24.5) delta = 4.0; else delta = 5.0; res.style.display = "block"; res.className = "yale-result-box"; if (curr < 50) { res.classList.add("yale-res-danger"); res.innerHTML = `🚨 <b>주입 즉시 중단 및 50% DW 50ml(25g) IV 투여</b><br><span class="yale-small-inst">1. 15분 간격 BST 확인 및 70 미만 시 50% DW 50ml(25g) IV 재투여<br>2. BST 100↑ 확인 시 1시간 뒤 BST 재확인</span>➔ 1시간 뒤 BST 100↑ 이면 <b>${(rate * 0.5).toFixed(1)} cc/hr</b> 재개`; } else if (curr < 70) { res.classList.add("yale-res-warning"); res.innerHTML = `⚠️ <b>주입 즉시 중단 및 50% DW 25ml(12.5g) IV 투여</b><br><span class="yale-small-inst">1. 15분 간격 BST 확인 및 70 미만 시 50% DW 25ml(12.5g) IV 재투여<br>2. BST 100↑ 확인 시 1시간 뒤 BST 재확인</span>➔ 1시간 뒤 BST 100↑ 이면 <b>${(rate * 0.75).toFixed(1)} cc/hr</b> 재개`; } else if (curr < 100) { res.classList.add("yale-res-warning"); res.innerHTML = `⚠️ <b>주입 즉시 중단</b><br><span class="yale-small-inst">1. 30분 간격 BST 확인 및 70 미만 시 50% DW 25ml(12.5g) IV 투여<br>2. BST 100↑ 확인 시 <b>${(rate * 0.75).toFixed(1)} cc/hr</b> 재개</span>`; } else { let nextRate = rate; let isHold = false; if (curr >= 250) { if (change < 0) nextRate = rate + 2 * delta; else if (change <= 40) nextRate = rate + delta; else if (change <= 80) nextRate = rate; else if (change <= 120) nextRate = rate - delta; else { nextRate = rate - 2 * delta; isHold = true; } } else if (curr >= 180) { if (change <= -40) nextRate = rate + 2 * delta; else if (change <= 0) nextRate = rate + delta; else if (change <= 40) nextRate = rate; else if (change <= 80) nextRate = rate - delta; else { nextRate = rate - 2 * delta; isHold = true; } } else if (curr >= 140) { if (change <= -21) nextRate = rate + delta; else if (change <= 20) nextRate = rate; else if (change <= 40) nextRate = rate - delta; else { nextRate = rate - 2 * delta; isHold = true; } } else { if (change < 0) nextRate = rate; else if (change <= 20) nextRate = rate - delta; else { nextRate = rate - 2 * delta; isHold = true; } } if (nextRate < 0) nextRate = 0; res.classList.add(isHold ? "yale-res-warning" : "yale-res-success"); res.innerHTML = `변화량: ${change.toFixed(1)} mg/dL/hr<br>${isHold ? "❗ <b>30분 HOLD 후 재개</b><br>" : ""}👉 다음 속도: <b><span class="yale-bold">${nextRate.toFixed(1)} cc/hr</span></b>`; } }
+    
+    function closeAllPopups() { 
+        document.getElementById('selection-panel').style.display = 'none'; 
+        document.getElementById('vent-panel').style.display = 'none'; 
+        document.getElementById('yale-panel').style.display = 'none'; 
+        document.getElementById('hep-panel').style.display = 'none'; 
+        document.getElementById('intubation-panel').style.display = 'none'; 
+        document.getElementById('info-panel').style.display = 'none'; 
+        document.getElementById('overlay').style.display = 'none'; 
+        const checkboxes = document.querySelectorAll('#checklist-container input'); 
+        if(document.getElementById('selection-panel').style.display === 'block' || checkboxes.length > 0) { 
+            activeDrugs = []; checkboxes.forEach(cb => { if (cb.checked) activeDrugs.push(cb.value); }); 
+            if(activeDrugs.length > 0) localStorage.setItem('sch_icu_v73_active', JSON.stringify(activeDrugs)); renderTable(); 
+        } 
+    }
+    
+    function resetAllData() { if(confirm("모든 입력값, Mix 설정, 약물 목록을 초기화하시겠습니까?")) { localStorage.removeItem('sch_icu_inputs'); localStorage.removeItem('sch_icu_mix'); localStorage.removeItem('sch_icu_weight'); localStorage.removeItem('sch_icu_v73_active'); location.reload(); } }
+    function copyEMR() { let text = `[ICU Drug Infusion] BW: ${document.getElementById('bw').value}kg\n`; let hasData = false; drugs.forEach(d => { if (currentDept === 'CCU' && ccuExclude.includes(d.id)) return; if (currentDept === 'SICU' && sicuExclude.includes(d.id)) return; if (!activeDrugs.includes(d.id)) return; const inputVal = parseFloat(savedInputs[d.id][currentMode]) || 0; if (inputVal > 0) { hasData = true; const outVal = document.getElementById(`output_${d.id}`).innerText; let doseUnit = d.unit.replace('Unit','U'); if (currentMode === 0) text += `- ${d.name}: ${inputVal} ${doseUnit} ➜ ${outVal} cc/hr\n`; else text += `- ${d.name}: ${inputVal} cc/hr ➜ ${outVal} ${doseUnit}\n`; } }); if(!hasData) { alert("입력된 약물이 없습니다."); return; } navigator.clipboard.writeText(text).then(() => { alert("📋 EMR 기록용 텍스트가 복사되었습니다!"); }); }
+    function renderChecklist() { checklistContainer.innerHTML = ''; drugs.forEach(d => { const checked = activeDrugs.includes(d.id) ? 'checked' : ''; let colorDot = d.color === 'red' ? '🔴' : (d.color === 'blue' ? '🔵' : (d.color === 'yellow' ? '🟡' : '🟢')); checklistContainer.innerHTML += `<label class="check-item"><input type="checkbox" value="${d.id}" ${checked} style="margin-right:10px; transform:scale(1.3);">${colorDot} ${d.name}</label>`; }); }
+    function openSettings() { document.getElementById('selection-panel').style.display = 'block'; document.getElementById('overlay').style.display = 'block'; }
+    
+    init();
+</script>
+</body>
+</html>
+
+
+
+</template>
+  </body>
+</html>
