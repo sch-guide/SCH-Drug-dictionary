@@ -9,6 +9,296 @@
     />
     <title>약물사전</title>
     <link rel="stylesheet" href="style.css" />
+
+    <style>
+      /* Mobile readability + compact layout overrides */
+      :root {
+        --mobile-radius: 14px;
+        --mobile-gap: 10px;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+
+      .app-shell {
+        width: min(100%, 720px);
+        margin: 0 auto;
+        padding: 14px 12px 78px;
+      }
+
+      .app-header {
+        margin-bottom: 10px;
+      }
+
+      .eyebrow {
+        margin: 0 0 2px;
+        font-size: 11px;
+        letter-spacing: .04em;
+      }
+
+      .app-header h1 {
+        margin: 0 0 6px;
+        font-size: clamp(24px, 7vw, 34px);
+        line-height: 1.1;
+      }
+
+      .notice {
+        margin: 0;
+        padding: 9px 10px;
+        font-size: 12px;
+        line-height: 1.45;
+        word-break: keep-all;
+      }
+
+      .tab-panel {
+        display: none;
+      }
+
+      .tab-panel.is-active {
+        display: block;
+      }
+
+      .card,
+      .calculator-card,
+      .search-card,
+      .drug-card,
+      .medicine-card,
+      .favorite-card,
+      .card-link-list > *,
+      .chip-list > * {
+        border-radius: var(--mobile-radius);
+      }
+
+      .card,
+      .calculator-card,
+      .search-card {
+        margin: 0 0 10px;
+        padding: 13px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 9px;
+      }
+
+      .section-head h2,
+      .calculator-card h2 {
+        margin: 0;
+        font-size: 17px;
+        line-height: 1.25;
+      }
+
+      .section-head p,
+      .helper-text,
+      .formula,
+      .example-text,
+      .calculation-line,
+      .error-text {
+        margin: 5px 0 0;
+        font-size: 12px;
+        line-height: 1.35;
+        word-break: keep-all;
+      }
+
+      .status-pill {
+        flex: 0 0 auto;
+        padding: 5px 8px;
+        font-size: 11px;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .search-form,
+      .field-grid {
+        display: grid;
+        gap: 9px;
+      }
+
+      label {
+        font-size: 13px;
+        line-height: 1.3;
+        font-weight: 700;
+      }
+
+      input,
+      select,
+      button {
+        font-size: 15px;
+      }
+
+      input,
+      select {
+        min-height: 42px;
+      }
+
+      .input-row,
+      .unit-field,
+      .submit-row,
+      .result-row {
+        gap: 8px;
+      }
+
+      .primary-action,
+      .copy-result,
+      .text-button,
+      .icon-button,
+      .quick-actions button,
+      .bottom-tabs button {
+        min-height: 40px;
+      }
+
+      .result-row {
+        margin-top: 10px;
+        padding: 9px 10px;
+      }
+
+      .result-row output {
+        font-size: 17px;
+        line-height: 1.25;
+        font-weight: 800;
+      }
+
+      .bottom-tabs {
+        gap: 4px;
+        padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+      }
+
+      .bottom-tabs button {
+        padding: 7px 4px;
+        font-size: 12px;
+        line-height: 1.2;
+        white-space: nowrap;
+      }
+
+      /* Dynamically-created drug cards: make each item shorter on phone */
+      .card-link-list,
+      .chip-list,
+      #favoriteList,
+      #cardList,
+      #recentList {
+        display: grid;
+        gap: 7px;
+      }
+
+      .drug-card,
+      .medicine-card,
+      .favorite-card,
+      .drug-item,
+      .favorite-item,
+      .card-link,
+      .card-link-list a,
+      .card-link-list button,
+      .chip-list button,
+      .chip-list .chip {
+        min-height: auto !important;
+        padding: 8px 10px !important;
+        font-size: 13px !important;
+        line-height: 1.25 !important;
+      }
+
+      .drug-card h3,
+      .medicine-card h3,
+      .favorite-card h3,
+      .drug-name,
+      .medicine-name,
+      .card-title {
+        margin: 0 0 3px !important;
+        font-size: 15px !important;
+        line-height: 1.25 !important;
+        font-weight: 800;
+      }
+
+      .drug-card p,
+      .medicine-card p,
+      .favorite-card p,
+      .drug-card li,
+      .medicine-card li,
+      .favorite-card li,
+      .drug-desc,
+      .medicine-desc,
+      .card-summary {
+        margin: 2px 0 !important;
+        font-size: 12px !important;
+        line-height: 1.3 !important;
+        word-break: keep-all;
+      }
+
+      .drug-card ul,
+      .medicine-card ul,
+      .favorite-card ul {
+        margin: 4px 0 0 !important;
+        padding-left: 16px !important;
+      }
+
+      .drug-card .meta,
+      .medicine-card .meta,
+      .favorite-card .meta,
+      .tag,
+      .badge {
+        padding: 3px 6px !important;
+        font-size: 10.5px !important;
+        line-height: 1.1 !important;
+      }
+
+      @media (max-width: 430px) {
+        .app-shell {
+          padding: 10px 9px 72px;
+        }
+
+        .card,
+        .calculator-card,
+        .search-card {
+          padding: 11px;
+          margin-bottom: 8px;
+        }
+
+        .section-head {
+          margin-bottom: 7px;
+        }
+
+        .section-head h2,
+        .calculator-card h2 {
+          font-size: 16px;
+        }
+
+        .field-grid {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+
+        .formula {
+          display: none;
+        }
+
+        .example-text {
+          font-size: 11.5px;
+        }
+
+        input,
+        select {
+          min-height: 40px;
+        }
+
+        .primary-action,
+        .copy-result,
+        .text-button,
+        .icon-button,
+        .quick-actions button,
+        .bottom-tabs button {
+          min-height: 38px;
+        }
+
+        .icu-frame {
+          min-height: calc(100vh - 170px);
+        }
+      }
+    </style>
   </head>
   <body>
     <main class="app-shell">
