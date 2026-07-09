@@ -433,28 +433,28 @@
             --u-mghr: #ffcc80; --u-mcghr: #ce93d8;
         }
         body { margin:0; padding:0; font-family:'Noto Sans KR',sans-serif; background:var(--bg-body); color:var(--text-main); -webkit-text-size-adjust:100%; transition:0.3s; }
-        .header { background:var(--bg-header); padding:20px 10px 15px 10px; position:sticky; top:0; z-index:1000; box-shadow:0 2px 8px rgba(0,0,0,0.3); display:flex; flex-direction:column; align-items:center; }
+        .header { background:var(--bg-header); padding:10px 10px 8px 10px; position:sticky; top:0; z-index:1000; box-shadow:0 2px 8px rgba(0,0,0,0.3); display:flex; flex-direction:column; align-items:center; }
         .btn-darkmode { position:absolute; top:15px; right:15px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.3); color:#fff; border-radius:50%; width:40px; height:40px; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-        .hospital-title { margin:0; font-size:2.3rem; font-weight:900; color:white; text-align:center; margin-bottom:5px; margin-top:15px; text-shadow:0 2px 4px rgba(0,0,0,0.3); line-height:1.1; }
-        .dept-title { margin:0 0 10px 0; font-size:1.5rem; font-weight:500; color:#bbdefb; opacity:0.95; }
-        .dept-switch-row { display:flex; width:100%; max-width:600px; gap:6px; margin-bottom:12px; }
-        .dept-btn { flex: 1; padding: 10px 0; border: 1px solid rgba(255,255,255,0.4); background: rgba(0,0,0,0.25); color: #ccc; border-radius: 8px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .hospital-title { margin:0; font-size:1.7rem; font-weight:900; color:white; text-align:center; margin-bottom:2px; margin-top:4px; text-shadow:0 2px 4px rgba(0,0,0,0.3); line-height:1.1; }
+        .dept-title { margin:0 0 6px 0; font-size:1.1rem; font-weight:500; color:#bbdefb; opacity:0.95; }
+        .dept-switch-row { display:flex; width:100%; max-width:600px; gap:6px; margin-bottom:6px; }
+        .dept-btn { flex: 1; padding: 6px 0; border: 1px solid rgba(255,255,255,0.4); background: rgba(0,0,0,0.25); color: #ccc; border-radius: 8px; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         #btn-sicu.active { background: #4db6ac; color: white; border-color: #80cbc4; box-shadow: 0 0 10px rgba(77,182,172, 0.6); transform: scale(1.02); }
         #btn-ccu.active { background: #f06292; color: white; border-color: #f48fb1; box-shadow: 0 0 10px rgba(240,98,146, 0.6); transform: scale(1.02); }
         #btn-micu.active { background: #7986cb; color: white; border-color: #9fa8da; box-shadow: 0 0 10px rgba(121,134,203, 0.6); transform: scale(1.02); }
-        .control-top-row { display:flex; width:100%; max-width:600px; gap:8px; margin-bottom:8px; justify-content: space-between; }
-        .weight-container { flex:0 0 auto; background: #d32f2f; border:1px solid rgba(255,255,255,0.3); border-radius:8px; padding:5px 15px; display:flex; align-items:center; gap:8px; }
-        .weight-label { font-size:1rem; font-weight:700; color:white; white-space:nowrap; }
-        .weight-input { width:70px; height:42px; border:2px solid #ffcdd2; border-radius:6px; text-align:center; font-size:1.7rem; font-weight:900; background:#fff; color:#d32f2f; }
+        .control-top-row { display:flex; width:100%; max-width:600px; gap:8px; margin-bottom:5px; justify-content: space-between; }
+        .weight-container { flex:0 0 auto; background: #d32f2f; border:1px solid rgba(255,255,255,0.3); border-radius:8px; padding:3px 12px; display:flex; align-items:center; gap:8px; }
+        .weight-label { font-size:0.9rem; font-weight:700; color:white; white-space:nowrap; }
+        .weight-input { width:62px; height:34px; border:2px solid #ffcdd2; border-radius:6px; text-align:center; font-size:1.4rem; font-weight:900; background:#fff; color:#d32f2f; }
         .btn-group { display:flex; flex-wrap: wrap; justify-content: center; gap:4px; flex:1; }
-        .btn-common { flex: 1 1 30%; border-radius:8px; font-weight:800; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.2); padding:10px 0; font-size: 0.8rem; letter-spacing: -0.5px; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
+        .btn-common { flex: 1 1 30%; border-radius:8px; font-weight:800; cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.2); padding:6px 0; font-size: 0.76rem; letter-spacing: -0.5px; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
         .btn-vent { background:#009688; color:#fff; border:2px solid #00796b; }
         .btn-yale { background:#7e57c2; color:#fff; border:2px solid #5e35b1; }
         .btn-heparin { background:#ff9800; color:#fff; border:2px solid #f57c00; }
         .btn-intubation { background:#3f51b5; color:#fff; border:2px solid #283593; }
         .btn-setting { background:#fdd835; color:#000; border:2px solid #fbc02d; }
-        .mode-row { display:flex; gap:5px; width:100%; max-width:600px; margin-top: 5px; }
-        .mode-btn { flex:1; border:none; border-radius:6px; padding:12px 0; font-size:1rem; font-weight:700; cursor:pointer; background:rgba(0,0,0,0.25); color:#cfd8dc; transition:0.2s; white-space:nowrap; }
+        .mode-row { display:flex; gap:5px; width:100%; max-width:600px; margin-top: 4px; }
+        .mode-btn { flex:1; border:none; border-radius:6px; padding:8px 0; font-size:0.92rem; font-weight:700; cursor:pointer; background:rgba(0,0,0,0.25); color:#cfd8dc; transition:0.2s; white-space:nowrap; }
         .mode-btn.active { background:#fff; color:var(--sch-blue); box-shadow:0 1px 3px rgba(0,0,0,0.2); }
         .table-wrap { padding:10px 5px 200px 5px; max-width:800px; margin:0 auto; }
         table { width:100%; border-collapse:separate; border-spacing:0; background:var(--bg-card); border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
@@ -534,19 +534,19 @@
 
         @media (max-width: 640px) {
             body { background:#eef3f8; }
-            .header { padding:14px 10px 12px; }
-            .hospital-title { font-size:1.35rem; margin-top:4px; }
-            .dept-title { font-size:1.05rem; margin-bottom:10px; }
+            .header { padding:8px 10px 6px; }
+            .hospital-title { font-size:1.2rem; margin-top:2px; margin-bottom:1px; }
+            .dept-title { font-size:0.92rem; margin-bottom:6px; }
             .dept-switch-row,
             .control-top-row,
             .mode-row { max-width:none; }
             .dept-btn,
-            .mode-btn { font-size:0.86rem; padding:10px 4px; }
+            .mode-btn { font-size:0.8rem; padding:6px 4px; }
             .control-top-row { align-items:stretch; }
-            .weight-container { padding:6px 10px; }
-            .weight-label { font-size:0.85rem; }
-            .weight-input { width:58px; height:38px; font-size:1.35rem; }
-            .btn-common { min-height:44px; font-size:0.86rem; }
+            .weight-container { padding:3px 8px; }
+            .weight-label { font-size:0.78rem; }
+            .weight-input { width:52px; height:32px; font-size:1.15rem; }
+            .btn-common { min-height:34px; font-size:0.76rem; padding:4px 0; }
             .table-wrap { padding:8px 8px 170px; max-width:none; }
             table,
             tbody { display:block; width:100%; background:transparent; box-shadow:none; border-radius:0; }
