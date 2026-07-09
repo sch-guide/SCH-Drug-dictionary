@@ -145,19 +145,23 @@
           <p class="example-text">예: 1g/5mL 약물에서 150mg 처방 → 0.75mL</p>
         </section>
 
-        <section class="calculator-card card">
-          <h2>BSA</h2>
-          <div class="field-grid">
-            <label for="heightCm">키(cm)<input id="heightCm" type="number" min="0" step="any" /></label>
-            <label for="weightKgBsa">체중(kg)<input id="weightKgBsa" type="number" min="0" step="any" /></label>
-          </div>
-          <div class="result-row">
-            <output id="bsaResult">-- m²</output>
-            <button type="button" class="copy-result" data-copy-target="bsaResult">복사</button>
-          </div>
-          <p class="error-text" id="bsaError"></p>
-          <p class="formula">BSA = √((키 × 체중) / 3600), Mosteller 공식</p>
-        </section>
+        <div class="calc-card">
+            <h3>항암 BSA 용량</h3>
+            <div class="calc-grid">
+                <label>전산 BSA(m²)<input id="emrBsa" type="number" min="0" step="any" placeholder="예: 1.49"></label>
+                <label>코멘트 용량(mg/m²)<input id="bsaDosePerM2" type="number" min="0" step="any" placeholder="예: 60"></label>
+                <label>감량률(%)
+                    <input id="bsaDosePercent" type="text" inputmode="decimal" placeholder="예: 80 또는 80%">
+                </label>
+            </div>
+            <div class="calc-result-row">
+                <output id="bsaResult" class="calc-result">-- mg</output>
+                <button class="calc-copy" onclick="copyCalcResult('bsaResult')">복사</button>
+            </div>
+            <p id="bsaFormulaLine" class="calc-note"></p>
+            <p id="bsaError" class="calc-error"></p>
+            <p class="calc-formula">총 용량(mg) = 전산 BSA(m²) × 코멘트 용량(mg/m²) × 감량률</p>
+        </div>
 
         <section class="calculator-card card">
           <h2>Cockcroft-Gault</h2>
